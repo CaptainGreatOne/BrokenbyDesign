@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 1 of 12 (Foundation Services)
-Plan: 4 of 6 in current phase
+Plan: 5 of 6 in current phase
 Status: In progress
-Last activity: 2026-02-05 - Completed 01-04-PLAN.md (Fulfillment Worker)
+Last activity: 2026-02-05 - Completed 01-05-PLAN.md (Traffic Generator and Compose Finalization)
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: ~2.8 minutes
-- Total execution time: 0.18 hours
+- Total execution time: 0.23 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-services | 4 | ~11 min | ~2.8 min |
+| 01-foundation-services | 5 | ~14 min | ~2.8 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (3 min), 01-03 (2 min), 01-04 (4 min)
-- Trend: Consistent velocity, sub-5min average
+- Last 5 plans: 01-01 (2 min), 01-02 (3 min), 01-03 (2 min), 01-04 (4 min), 01-05 (3 min)
+- Trend: Consistent velocity, sub-5min average maintained
 
 *Updated after each plan completion*
 
@@ -60,6 +60,14 @@ Recent decisions affecting current work:
 - Simulated processing delay 500ms-2s - creates realistic latency variation for observability tooling (01-04)
 - Multi-stage Docker build with Alpine runtime - produces minimal ~10MB Go images (01-04)
 - Handler pattern in queue consumer - separates queue mechanics from business logic (01-04)
+- Axios over node-fetch: Better HTTP client error handling and simpler API (01-05)
+- Traffic auto-starts in steady mode (2 RPS): Ensures system is observable from startup (01-05)
+- 10-second startup delay: Allows services to initialize before traffic begins (01-05)
+- Mixed request distribution (60% create, 25% list, 15% get-by-id): Realistic traffic patterns (01-05)
+- Ring buffer of 50 recent order IDs: Enables GET-by-ID requests without database queries (01-05)
+- Jitter +/- 20% on intervals: Avoids perfectly uniform traffic, more realistic (01-05)
+- Resource budget ~5GB core services: Leaves ~7GB for profile services (tracing, kafka, cicd) (01-05)
+- json-file logging with rotation (10m max, 3 files): Prevents disk exhaustion (01-05)
 
 ### Pending Todos
 
@@ -71,7 +79,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 23:34 UTC
-Stopped at: Completed 01-04-PLAN.md (Fulfillment Worker)
+Last session: 2026-02-05 23:40 UTC
+Stopped at: Completed 01-05-PLAN.md (Traffic Generator and Compose Finalization)
 Resume file: None
-Next: Execute 01-05-PLAN.md (Traffic Generator implementation)
+Next: Execute 01-06-PLAN.md (End-to-End Integration Verification)
