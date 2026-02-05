@@ -41,10 +41,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   7. Docker Compose profiles enable/disable module groups (core, tracing, kafka, cicd, full)
   8. All containers stay within 12GB total RAM budget with configured resource limits
   9. Health check script confirms all services are running and healthy
-**Plans**: TBD
+**Plans**: 6 plans
 
 Plans:
-- [ ] TBD during planning
+- [ ] 01-01-PLAN.md -- Project scaffolding, Docker Compose, infra configs, proto contract
+- [ ] 01-02-PLAN.md -- Order API (Python gRPC server + PostgreSQL + Redis queue)
+- [ ] 01-03-PLAN.md -- Web Gateway (Node.js REST + gRPC client)
+- [ ] 01-04-PLAN.md -- Fulfillment Worker (Go Redis queue consumer)
+- [ ] 01-05-PLAN.md -- Traffic generator + profiles + resource limits
+- [ ] 01-06-PLAN.md -- Health check script + end-to-end verification
 
 ### Phase 2: Metrics & Dashboards
 **Goal**: Learner can visualize service health, request rates, errors, and latency in Grafana dashboards
@@ -220,11 +225,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation Services | 0/TBD | Not started | - |
+| 1. Foundation Services | 0/6 | Planning complete | - |
 | 2. Metrics & Dashboards | 0/TBD | Not started | - |
 | 3. Centralized Logging | 0/TBD | Not started | - |
 | 4. Alerting | 0/TBD | Not started | - |
