@@ -1,0 +1,16 @@
+{
+  "name": "traffic-generator",
+  "version": "1.0.0",
+  "description": "HTTP traffic generator for observability pipeline testing",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "axios": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
