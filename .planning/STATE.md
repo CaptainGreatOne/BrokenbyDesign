@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 1 of 12 (Foundation Services)
-Plan: 1 of 6 in current phase
+Plan: 2 of 6 in current phase
 Status: In progress
-Last activity: 2026-02-05 - Completed 01-01-PLAN.md (Project Scaffolding)
+Last activity: 2026-02-05 - Completed 01-02-PLAN.md (Order API)
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: ~2 minutes
-- Total execution time: 0.03 hours
+- Total plans completed: 2
+- Average duration: ~2.5 minutes
+- Total execution time: 0.08 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-services | 1 | ~2 min | ~2 min |
+| 01-foundation-services | 2 | ~5 min | ~2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min)
-- Trend: Establishing baseline
+- Last 5 plans: 01-01 (2 min), 01-02 (3 min)
+- Trend: Consistent velocity
 
 *Updated after each plan completion*
 
@@ -49,6 +49,9 @@ Recent decisions affecting current work:
 - Repo root build context for order-api/web-gateway: Both services need access to proto/ directory (01-01)
 - Non-standard host ports (5433, 6380): Avoid conflicts with existing local postgres/redis (01-01)
 - JSON log format in nginx: Structured logging readiness for later phases (01-01)
+- Generated protobuf code at Docker build time from shared proto/ directory (01-02)
+- Cache-first product lookup pattern: Redis cache before PostgreSQL (01-02)
+- Connection retry logic (5 retries, 2s delay) for PostgreSQL and Redis startup ordering (01-02)
 
 ### Pending Todos
 
@@ -60,7 +63,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 13:00 UTC
-Stopped at: Completed 01-01-PLAN.md (Project Scaffolding)
+Last session: 2026-02-05 23:30 UTC
+Stopped at: Completed 01-02-PLAN.md (Order API)
 Resume file: None
-Next: Execute 01-02-PLAN.md (Web Gateway implementation)
+Next: Execute 01-03-PLAN.md (Web Gateway implementation)
