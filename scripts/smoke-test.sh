@@ -90,9 +90,9 @@ echo "Test 2: Get the created order (ID: $ORDER_ID)"
 GET_RESPONSE=$(curl -sf http://localhost:80/orders/$ORDER_ID 2>/dev/null)
 
 if [ "$HAS_JQ" = true ]; then
-    RETRIEVED_ORDER_ID=$(echo "$GET_RESPONSE" | jq -r '.order_id')
+    RETRIEVED_ORDER_ID=$(echo "$GET_RESPONSE" | jq -r '.id')
 else
-    RETRIEVED_ORDER_ID=$(echo "$GET_RESPONSE" | grep -o '"order_id"[[:space:]]*:[[:space:]]*[0-9]*' | grep -o '[0-9]*')
+    RETRIEVED_ORDER_ID=$(echo "$GET_RESPONSE" | grep -o '"id"[[:space:]]*:[[:space:]]*[0-9]*' | grep -o '[0-9]*' | head -1)
 fi
 
 if [ "$RETRIEVED_ORDER_ID" = "$ORDER_ID" ]; then
@@ -169,10 +169,10 @@ STATUS_RESPONSE=$(curl -sf http://localhost:8089/status 2>/dev/null)
 
 if [ "$HAS_JQ" = true ]; then
     TRAFFIC_MODE=$(echo "$STATUS_RESPONSE" | jq -r '.mode')
-    TOTAL_REQUESTS=$(echo "$STATUS_RESPONSE" | jq -r '.total_requests')
+    TOTAL_REQUESTS=$(echo "$STATUS_RESPONSE" | jq -r '.stats.total')
 else
     TRAFFIC_MODE=$(echo "$STATUS_RESPONSE" | grep -o '"mode"[[:space:]]*:[[:space:]]*"[^"]*"' | grep -o '"[^"]*"$' | tr -d '"')
-    TOTAL_REQUESTS=$(echo "$STATUS_RESPONSE" | grep -o '"total_requests"[[:space:]]*:[[:space:]]*[0-9]*' | grep -o '[0-9]*')
+    TOTAL_REQUESTS=$(echo "$STATUS_RESPONSE" | grep -o '"total"[[:space:]]*:[[:space:]]*[0-9]*' | grep -o '[0-9]*' | head -1)
 fi
 
 if [ -n "$TRAFFIC_MODE" ] && [ "$TOTAL_REQUESTS" -gt 0 ] 2>/dev/null; then

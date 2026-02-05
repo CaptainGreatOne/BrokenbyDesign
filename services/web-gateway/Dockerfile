@@ -11,8 +11,8 @@ COPY services/web-gateway/package.json services/web-gateway/package-lock.json* .
 # Install production dependencies
 RUN npm install --production
 
-# Copy proto files (shared with order-api)
-COPY proto/ /app/proto/
+# Copy proto files (shared with order-api) to /proto for grpc-client.js
+COPY proto/ /proto/
 
 # Copy application source
 COPY services/web-gateway/src/ /app/src/
