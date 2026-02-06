@@ -13,7 +13,7 @@ This roadmap builds a complete, modular learning environment for observability a
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation Services** - Pre-built polyglot microservices with automated traffic and one-command startup
-- [ ] **Phase 2: Metrics & Dashboards** - Prometheus + Grafana with working dashboards showing service health
+- [x] **Phase 2: Metrics & Dashboards** - Prometheus + Grafana with working dashboards showing service health
 - [ ] **Phase 3: Centralized Logging** - Loki + Promtail for aggregated log search across all services
 - [ ] **Phase 4: Alerting** - Alertmanager with rules that detect and route common failure patterns
 - [ ] **Phase 5: Distributed Tracing** - Jaeger + OpenTelemetry for cross-service request visualization
@@ -65,10 +65,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Instrument web-gateway (Node.js) and order-api (Python) with /metrics endpoints
-- [ ] 02-02-PLAN.md -- Instrument fulfillment-worker (Go) with HTTP metrics server + /metrics endpoint
-- [ ] 02-03-PLAN.md -- Prometheus + cAdvisor + Node Exporter Docker Compose services
-- [ ] 02-04-PLAN.md -- Grafana provisioning with pre-built dashboards
+- [x] 02-01-PLAN.md -- Instrument web-gateway (Node.js) and order-api (Python) with /metrics endpoints
+- [x] 02-02-PLAN.md -- Instrument fulfillment-worker (Go) with HTTP metrics server + /metrics endpoint
+- [x] 02-03-PLAN.md -- Prometheus + cAdvisor + Node Exporter Docker Compose services
+- [x] 02-04-PLAN.md -- Grafana provisioning with pre-built dashboards
 
 ### Phase 3: Centralized Logging
 **Goal**: Learner can search and filter logs from all services in one place
@@ -233,7 +233,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation Services | 6/6 | Complete | 2026-02-06 |
-| 2. Metrics & Dashboards | 0/4 | Planning complete | - |
+| 2. Metrics & Dashboards | 4/4 | Complete | 2026-02-06 |
 | 3. Centralized Logging | 0/TBD | Not started | - |
 | 4. Alerting | 0/TBD | Not started | - |
 | 5. Distributed Tracing | 0/TBD | Not started | - |

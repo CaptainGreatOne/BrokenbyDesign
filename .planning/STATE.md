@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 2 of 12 (Metrics & Dashboards)
-Plan: 3 of 4 in current phase
-Status: In progress
-Last activity: 2026-02-06 - Completed 02-03-PLAN.md (Prometheus and Infrastructure Exporters Deployment)
+Plan: 4 of 4 in current phase
+Status: Phase complete
+Last activity: 2026-02-06 - Completed 02-04-PLAN.md (Grafana with Pre-Provisioned Dashboards)
 
-Progress: [███░░░░░░░] 16% (1 phase complete + 3 of 4 plans in phase 2)
+Progress: [████░░░░░░] 18% (2 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: ~3 minutes
 - Total execution time: ~0.5 hours
 
@@ -28,11 +28,11 @@ Progress: [███░░░░░░░] 16% (1 phase complete + 3 of 4 plans 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-services | 6 | ~18 min | ~3 min |
-| 02-metrics-dashboards | 3 | ~7.5 min | ~2.5 min |
+| 02-metrics-dashboards | 4 | ~10 min | ~2.5 min |
 
 **Recent Trend:**
-- Last 8 plans: 01-03 (2 min), 01-04 (4 min), 01-05 (3 min), 01-06 (5 min), 02-01 (2 min), 02-02 (4 min), 02-03 (1.5 min)
-- Trend: Excellent velocity, sub-3min average for Phase 2
+- Last 8 plans: 01-04 (4 min), 01-05 (3 min), 01-06 (5 min), 02-01 (2 min), 02-02 (4 min), 02-03 (1.5 min), 02-04 (2.5 min)
+- Trend: Excellent velocity, Phase 2 complete with consistent sub-3min average
 
 *Updated after each plan completion*
 
@@ -58,6 +58,10 @@ Recent decisions affecting current work:
 - Node Exporter with --path.rootfs=/host: Preserves Docker DNS while providing host metrics
 - Prometheus retention 7d/5GB: Balances learning usage with storage constraints
 - Service health orchestration: Prometheus depends on service_healthy for all app services
+- Grafana port 3001: Avoids confusion with web-gateway internal port 3000
+- Grafana datasource uid 'prometheus': Stable reference for dashboards, supports future Loki/Jaeger datasources
+- Service Overview as default home dashboard: Learner sees value immediately on first login
+- Grafana provisioning for multi-datasource: Directory structure supports adding Loki (Phase 3) and Jaeger (Phase 5) without modification
 
 ### Pending Todos
 
@@ -69,7 +73,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-06T22:27:33Z
-Stopped at: Completed 02-03-PLAN.md (Prometheus and Infrastructure Exporters Deployment)
+Last session: 2026-02-06T22:34:14Z
+Stopped at: Completed 02-04-PLAN.md (Grafana with Pre-Provisioned Dashboards) - Phase 2 complete
 Resume file: None
-Next: Continue Phase 2 with Plan 02-04 (Grafana deployment and dashboard creation)
+Next: Begin Phase 3 planning (Centralized Logging with Loki + Promtail)
