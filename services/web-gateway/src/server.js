@@ -7,6 +7,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('./logger');
 const routes = require('./routes');
+const { register, httpRequestCounter, httpRequestDuration } = require('./metrics');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -56,6 +57,27 @@ app.use((req, res, next) => {
   });
 
   next();
+});
+
+// Middleware: Prometheus metrics tracking
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on('finish', () => {
+    const duration = (Date.now() - start) / 1000; // Convert to seconds
+    const route = req.route?.path || req.path;
+
+    httpRequestCounter.labels(req.method, route, res.statusCode).inc();
+    httpRequestDuration.labels(req.method, route, res.statusCode).observe(duration);
+  });
+
+  next();
+});
+
+// Prometheus metrics endpoint (must be before routes to avoid being intercepted)
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
 });
 
 // Mount routes
