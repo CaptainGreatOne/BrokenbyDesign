@@ -5,32 +5,32 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Remove the setup tax so learning happens immediately. Services already exist and misbehave. Tools are pre-wired. You just learn.
-**Current focus:** Phase 1: Foundation Services
+**Current focus:** Phase 2: Metrics & Dashboards
 
 ## Current Position
 
-Phase: 1 of 12 (Foundation Services)
-Plan: 5 of 6 in current phase
-Status: In progress
-Last activity: 2026-02-05 - Completed 01-05-PLAN.md (Traffic Generator and Compose Finalization)
+Phase: 2 of 12 (Metrics & Dashboards)
+Plan: 0 of TBD in current phase
+Status: Not yet planned
+Last activity: 2026-02-06 - Completed Phase 1 (Foundation Services), all 6 plans executed and verified
 
-Progress: [█████░░░░░] 50%
+Progress: [█░░░░░░░░░] 8% (1 of 12 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: ~2.8 minutes
-- Total execution time: 0.23 hours
+- Total plans completed: 6
+- Average duration: ~3 minutes
+- Total execution time: ~0.3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-services | 5 | ~14 min | ~2.8 min |
+| 01-foundation-services | 6 | ~18 min | ~3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (3 min), 01-03 (2 min), 01-04 (4 min), 01-05 (3 min)
+- Last 6 plans: 01-01 (2 min), 01-02 (3 min), 01-03 (2 min), 01-04 (4 min), 01-05 (3 min), 01-06 (5 min)
 - Trend: Consistent velocity, sub-5min average maintained
 
 *Updated after each plan completion*
@@ -46,28 +46,7 @@ Recent decisions affecting current work:
 - Pre-built services over tutorials: Eliminates setup tax, learner focuses on observability
 - Modular architecture: Allows starting small on limited resources, scaling up
 - Standard stack first: Prometheus/Grafana/ELK are industry standards, interview-relevant
-- Repo root build context for order-api/web-gateway: Both services need access to proto/ directory (01-01)
-- Non-standard host ports (5433, 6380): Avoid conflicts with existing local postgres/redis (01-01)
-- JSON log format in nginx: Structured logging readiness for later phases (01-01)
-- Generated protobuf code at Docker build time from shared proto/ directory (01-02)
-- Cache-first product lookup pattern: Redis cache before PostgreSQL (01-02)
-- Connection retry logic (5 retries, 2s delay) for PostgreSQL and Redis startup ordering (01-02)
-- Correlation ID middleware extracts X-Request-ID header or generates UUID - ensures every request traceable (01-03)
-- gRPC error codes mapped to HTTP status codes - maintains REST semantics (01-03)
-- Redis failures handled gracefully - cache miss instead of service error (01-03)
-- Request timing middleware logs duration on response finish - non-blocking observability (01-03)
-- BRPOP with 5-second timeout (not infinite) - allows periodic context check for graceful shutdown (01-04)
-- Simulated processing delay 500ms-2s - creates realistic latency variation for observability tooling (01-04)
-- Multi-stage Docker build with Alpine runtime - produces minimal ~10MB Go images (01-04)
-- Handler pattern in queue consumer - separates queue mechanics from business logic (01-04)
-- Axios over node-fetch: Better HTTP client error handling and simpler API (01-05)
-- Traffic auto-starts in steady mode (2 RPS): Ensures system is observable from startup (01-05)
-- 10-second startup delay: Allows services to initialize before traffic begins (01-05)
-- Mixed request distribution (60% create, 25% list, 15% get-by-id): Realistic traffic patterns (01-05)
-- Ring buffer of 50 recent order IDs: Enables GET-by-ID requests without database queries (01-05)
-- Jitter +/- 20% on intervals: Avoids perfectly uniform traffic, more realistic (01-05)
-- Resource budget ~5GB core services: Leaves ~7GB for profile services (tracing, kafka, cicd) (01-05)
-- json-file logging with rotation (10m max, 3 files): Prevents disk exhaustion (01-05)
+- Resource budget ~5GB core services: Leaves ~7GB for profile services (tracing, kafka, cicd)
 
 ### Pending Todos
 
@@ -79,7 +58,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 23:40 UTC
-Stopped at: Completed 01-05-PLAN.md (Traffic Generator and Compose Finalization)
+Last session: 2026-02-06
+Stopped at: Phase 1 complete. Phase 2 (Metrics & Dashboards) ready to plan.
 Resume file: None
-Next: Execute 01-06-PLAN.md (End-to-End Integration Verification)
+Next: Plan Phase 2 — Prometheus + Grafana instrumentation and dashboards
