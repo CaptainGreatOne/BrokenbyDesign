@@ -33,5 +33,8 @@ RUN apk add --no-cache ca-certificates
 # Copy binary from builder stage
 COPY --from=builder /worker /worker
 
+# Expose metrics port
+EXPOSE 2112
+
 # Run the worker
 CMD ["/worker"]

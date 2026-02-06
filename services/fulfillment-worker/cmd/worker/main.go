@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"fulfillment-worker/internal/db"
 	"fulfillment-worker/internal/logger"
+	"fulfillment-worker/internal/metrics"
 	"fulfillment-worker/internal/queue"
 	"math/rand"
 	"os"
@@ -48,6 +49,9 @@ func main() {
 	}
 	defer rdb.Close()
 
+	// Start metrics server in a goroutine
+	go metrics.StartMetricsServer(2112)
+
 	logger.Info("Fulfillment Worker started, consuming from fulfillment_queue", "", nil)
 
 	// Define order processing handler
@@ -66,6 +70,8 @@ func main() {
 			logger.Error("Failed to update order status to processing", msg.CorrelationID, err, map[string]interface{}{
 				"order_id": msg.OrderID,
 			})
+			metrics.ProcessingDuration.WithLabelValues("error").Observe(time.Since(startTime).Seconds())
+			metrics.OrdersProcessed.WithLabelValues("error").Inc()
 			return err
 		}
 
@@ -80,6 +86,8 @@ func main() {
 			logger.Error("Failed to update order status to fulfilled", msg.CorrelationID, err, map[string]interface{}{
 				"order_id": msg.OrderID,
 			})
+			metrics.ProcessingDuration.WithLabelValues("error").Observe(time.Since(startTime).Seconds())
+			metrics.OrdersProcessed.WithLabelValues("error").Inc()
 			return err
 		}
 
@@ -90,6 +98,10 @@ func main() {
 			"quantity":              msg.Quantity,
 			"processing_duration_ms": duration.Milliseconds(),
 		})
+
+		// Track successful processing metrics
+		metrics.ProcessingDuration.WithLabelValues("success").Observe(duration.Seconds())
+		metrics.OrdersProcessed.WithLabelValues("success").Inc()
 
 		return nil
 	}
