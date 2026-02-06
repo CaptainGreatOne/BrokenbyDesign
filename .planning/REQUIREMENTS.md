@@ -136,22 +136,22 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
-| FOUND-02 | Phase 1 | Pending |
-| FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
-| FOUND-06 | Phase 1 | Pending |
-| FOUND-07 | Phase 1 | Pending |
-| FOUND-08 | Phase 1 | Pending |
-| FOUND-09 | Phase 1 | Pending |
-| FOUND-10 | Phase 1 | Pending |
-| METR-01 | Phase 2 | Pending |
-| METR-02 | Phase 2 | Pending |
-| METR-03 | Phase 2 | Pending |
-| METR-04 | Phase 2 | Pending |
-| METR-05 | Phase 2 | Pending |
-| METR-06 | Phase 2 | Pending |
+| FOUND-01 | Phase 1 | Complete |
+| FOUND-02 | Phase 1 | Complete |
+| FOUND-03 | Phase 1 | Complete |
+| FOUND-04 | Phase 1 | Complete |
+| FOUND-05 | Phase 1 | Complete |
+| FOUND-06 | Phase 1 | Complete |
+| FOUND-07 | Phase 1 | Complete |
+| FOUND-08 | Phase 1 | Complete |
+| FOUND-09 | Phase 1 | Complete |
+| FOUND-10 | Phase 1 | Complete |
+| METR-01 | Phase 2 | Complete |
+| METR-02 | Phase 2 | Complete (Prometheus only; Loki Phase 3, Jaeger Phase 5) |
+| METR-03 | Phase 2 | Complete |
+| METR-04 | Phase 2 | Complete |
+| METR-05 | Phase 2 | Complete |
+| METR-06 | Phase 2 | Complete |
 | LOGG-01 | Phase 3 | Pending |
 | LOGG-02 | Phase 3 | Pending |
 | LOGG-03 | Phase 3 | Pending |
