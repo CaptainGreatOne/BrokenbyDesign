@@ -12,7 +12,7 @@ This roadmap builds a complete, modular learning environment for observability a
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation Services** - Pre-built polyglot microservices with automated traffic and one-command startup
+- [x] **Phase 1: Foundation Services** - Pre-built polyglot microservices with automated traffic and one-command startup
 - [ ] **Phase 2: Metrics & Dashboards** - Prometheus + Grafana with working dashboards showing service health
 - [ ] **Phase 3: Centralized Logging** - Loki + Promtail for aggregated log search across all services
 - [ ] **Phase 4: Alerting** - Alertmanager with rules that detect and route common failure patterns
@@ -44,12 +44,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 6 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Project scaffolding, Docker Compose, infra configs, proto contract
-- [ ] 01-02-PLAN.md -- Order API (Python gRPC server + PostgreSQL + Redis queue)
-- [ ] 01-03-PLAN.md -- Web Gateway (Node.js REST + gRPC client)
-- [ ] 01-04-PLAN.md -- Fulfillment Worker (Go Redis queue consumer)
-- [ ] 01-05-PLAN.md -- Traffic generator + profiles + resource limits
-- [ ] 01-06-PLAN.md -- Health check script + end-to-end verification
+- [x] 01-01-PLAN.md -- Project scaffolding, Docker Compose, infra configs, proto contract
+- [x] 01-02-PLAN.md -- Order API (Python gRPC server + PostgreSQL + Redis queue)
+- [x] 01-03-PLAN.md -- Web Gateway (Node.js REST + gRPC client)
+- [x] 01-04-PLAN.md -- Fulfillment Worker (Go Redis queue consumer)
+- [x] 01-05-PLAN.md -- Traffic generator + profiles + resource limits
+- [x] 01-06-PLAN.md -- Health check script + end-to-end verification
 
 ### Phase 2: Metrics & Dashboards
 **Goal**: Learner can visualize service health, request rates, errors, and latency in Grafana dashboards
@@ -62,10 +62,13 @@ Plans:
   4. cAdvisor exposes per-container CPU and memory usage visible in Grafana
   5. Node Exporter exposes host-level system metrics visible in Grafana
   6. Dashboards populate with data within 60 seconds of environment startup
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD during planning
+- [ ] 02-01-PLAN.md -- Instrument web-gateway (Node.js) and order-api (Python) with /metrics endpoints
+- [ ] 02-02-PLAN.md -- Instrument fulfillment-worker (Go) with HTTP metrics server + /metrics endpoint
+- [ ] 02-03-PLAN.md -- Prometheus + cAdvisor + Node Exporter Docker Compose services
+- [ ] 02-04-PLAN.md -- Grafana provisioning with pre-built dashboards
 
 ### Phase 3: Centralized Logging
 **Goal**: Learner can search and filter logs from all services in one place
@@ -229,8 +232,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation Services | 0/6 | Planning complete | - |
-| 2. Metrics & Dashboards | 0/TBD | Not started | - |
+| 1. Foundation Services | 6/6 | Complete | 2026-02-06 |
+| 2. Metrics & Dashboards | 0/4 | Planning complete | - |
 | 3. Centralized Logging | 0/TBD | Not started | - |
 | 4. Alerting | 0/TBD | Not started | - |
 | 5. Distributed Tracing | 0/TBD | Not started | - |
