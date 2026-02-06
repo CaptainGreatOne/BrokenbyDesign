@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'web-gateway'
+    static_configs:
+      - targets: ['web-gateway:3000']
+    metrics_path: '/metrics'
+
+  - job_name: 'order-api'
+    static_configs:
+      - targets: ['order-api:8000']
+    metrics_path: '/metrics'
+
+  - job_name: 'fulfillment-worker'
+    static_configs:
+      - targets: ['fulfillment-worker:2112']
+    metrics_path: '/metrics'
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 10s
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
