@@ -30,5 +30,8 @@ ENV PYTHONPATH=/app/src
 # Expose gRPC port
 EXPOSE 50051
 
+# Expose Prometheus metrics HTTP port
+EXPOSE 8000
+
 # Run server with unbuffered output for Docker logs
 CMD ["python", "-u", "src/server.py"]
