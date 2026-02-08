@@ -1,75 +1,62 @@
 package logger
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 )
 
-// LogEntry represents a structured log entry
-type LogEntry struct {
-	Timestamp     string                 `json:"timestamp"`
-	Level         string                 `json:"level"`
-	Service       string                 `json:"service"`
-	Message       string                 `json:"message"`
-	CorrelationID string                 `json:"correlation_id,omitempty"`
-	Error         string                 `json:"error,omitempty"`
-	Fields        map[string]interface{} `json:"fields,omitempty"`
-}
-
 const serviceName = "fulfillment-worker"
 
-// Info logs an informational message with optional fields
-func Info(message, correlationID string, fields ...map[string]interface{}) {
-	log("INFO", message, correlationID, "", fields...)
+// Info logs an informational message with handler, id, and optional fields
+func Info(message, handler, id string, fields map[string]interface{}) {
+	log("INFO", message, handler, id, "", fields)
 }
 
-// Error logs an error message with optional fields
-func Error(message, correlationID string, err error, fields ...map[string]interface{}) {
+// Error logs an error message with handler, id, error, and optional fields
+func Error(message, handler, id string, err error, fields map[string]interface{}) {
 	errMsg := ""
 	if err != nil {
 		errMsg = err.Error()
 	}
-	log("ERROR", message, correlationID, errMsg, fields...)
+	log("ERROR", message, handler, id, errMsg, fields)
 }
 
-// Warn logs a warning message with optional fields
-func Warn(message, correlationID string, fields ...map[string]interface{}) {
-	log("WARN", message, correlationID, "", fields...)
+// Warn logs a warning message with handler, id, and optional fields
+func Warn(message, handler, id string, fields map[string]interface{}) {
+	log("WARN", message, handler, id, "", fields)
 }
 
-// log is the internal logging function
-func log(level, message, correlationID, errMsg string, fields ...map[string]interface{}) {
-	entry := LogEntry{
-		Timestamp:     time.Now().UTC().Format(time.RFC3339),
-		Level:         level,
-		Service:       serviceName,
-		Message:       message,
-		CorrelationID: correlationID,
-		Error:         errMsg,
+// log is the internal logging function that outputs plain text
+func log(level, message, handler, id, errMsg string, fields map[string]interface{}) {
+	// Timestamp in RFC3339 format
+	timestamp := time.Now().UTC().Format(time.RFC3339)
+
+	// Level padded to 5 characters
+	levelPadded := fmt.Sprintf("%-5s", level)
+
+	// Start building the log line
+	logLine := fmt.Sprintf("%s %s %s %s", timestamp, levelPadded, serviceName, handler)
+
+	// Add ID if present (format as item=id for this service)
+	if id != "" {
+		logLine += fmt.Sprintf(" item=%s", id)
 	}
 
-	// Merge all provided fields into a single map
-	if len(fields) > 0 {
-		merged := make(map[string]interface{})
-		for _, fieldMap := range fields {
-			for k, v := range fieldMap {
-				merged[k] = v
-			}
+	// Add error field if present
+	if errMsg != "" {
+		logLine += fmt.Sprintf(" error=%s", errMsg)
+	}
+
+	// Add additional fields
+	if fields != nil {
+		for k, v := range fields {
+			logLine += fmt.Sprintf(" %s=%v", k, v)
 		}
-		if len(merged) > 0 {
-			entry.Fields = merged
-		}
 	}
 
-	// Marshal to JSON and print to stdout
-	jsonBytes, err := json.Marshal(entry)
-	if err != nil {
-		// Fallback to plain text if JSON marshaling fails
-		fmt.Printf("{\"timestamp\":\"%s\",\"level\":\"ERROR\",\"service\":\"%s\",\"message\":\"Failed to marshal log entry\",\"error\":\"%s\"}\n",
-			time.Now().UTC().Format(time.RFC3339), serviceName, err.Error())
-		return
-	}
+	// Append message at the end
+	logLine += fmt.Sprintf(" %s", message)
 
-	fmt.Println(string(jsonBytes))
+	// Print to stdout
+	fmt.Printf("%s\n", logLine)
 }
