@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 3 of 12 (Centralized Logging)
-Plan: 3 of 4 in current phase
-Status: In progress
-Last activity: 2026-02-08 - Completed 03-03-PLAN.md (fulfillment-worker Plain Text Logging)
+Plan: 4 of 4 in current phase
+Status: Phase complete
+Last activity: 2026-02-08 - Completed 03-04-PLAN.md (Loki & Alloy Deployment)
 
-Progress: [██░░░░░░░░] 26% (13 plans completed)
+Progress: [███░░░░░░░] 52% (14 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: ~2.7 minutes
+- Total plans completed: 14
+- Average duration: ~2.6 minutes
 - Total execution time: ~0.6 hours
 
 **By Phase:**
@@ -29,11 +29,11 @@ Progress: [██░░░░░░░░] 26% (13 plans completed)
 |-------|-------|-------|----------|
 | 01-foundation-services | 6 | ~18 min | ~3 min |
 | 02-metrics-dashboards | 4 | ~10 min | ~2.5 min |
-| 03-centralized-logging | 3 | ~8.8 min | ~2.9 min |
+| 03-centralized-logging | 4 | ~10.8 min | ~2.7 min |
 
 **Recent Trend:**
-- Last 8 plans: 02-01 (2 min), 02-02 (4 min), 02-03 (1.5 min), 02-04 (2.5 min), 03-01 (5 min), 03-02 (2.3 min), 03-03 (1.5 min)
-- Trend: Excellent velocity, Phase 3 execution averaging under 3 minutes per plan
+- Last 8 plans: 02-02 (4 min), 02-03 (1.5 min), 02-04 (2.5 min), 03-01 (5 min), 03-02 (2.3 min), 03-03 (1.5 min), 03-04 (2 min)
+- Trend: Excellent velocity, Phase 3 complete at ~2.7 min average
 
 *Updated after each plan completion*
 
@@ -69,6 +69,11 @@ Recent decisions affecting current work:
 - Log ID field priority: order_id → req_id → correlation_id extraction for consistent filtering
 - Handler as first-class parameter in Go: Makes handler explicit in function signature for clearer API and reliable parsing
 - Item ID format in Go logs: Use "item=id" prefix to distinguish from correlation IDs, semantic clarity for filtering
+- Alloy over Promtail: Grafana's unified agent for logs, metrics, and traces
+- Service filtering in Alloy: Only collect from 3 application services to reduce noise
+- Loki monolithic mode: Simpler deployment for local learning environment
+- 72h retention: Balances learning exploration with storage constraints
+- Docker socket access for Alloy: Enables automatic container discovery
 
 ### Pending Todos
 
@@ -80,7 +85,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-08T13:14:10Z
-Stopped at: Completed 03-03-PLAN.md (fulfillment-worker Plain Text Logging)
+Last session: 2026-02-08T13:20:01Z
+Stopped at: Completed 03-04-PLAN.md (Loki & Alloy Deployment) - Phase 3 complete
 Resume file: None
-Next: Continue Phase 3 - execute 03-04 (Loki & Promtail deployment)
+Next: Phase 4 - Alerting & Notification (4 plans)
