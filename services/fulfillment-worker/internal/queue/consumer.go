@@ -30,7 +30,7 @@ func NewRedisClient(ctx context.Context) (*redis.Client, error) {
 	retryDelay := 2 * time.Second
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
-		logger.Info("Connecting to Redis", "", map[string]interface{}{
+		logger.Info("Connecting to Redis", "RedisConnection", "", map[string]interface{}{
 			"attempt":     attempt,
 			"max_retries": maxRetries,
 			"url":         redisURL,
@@ -38,7 +38,7 @@ func NewRedisClient(ctx context.Context) (*redis.Client, error) {
 
 		opt, err := redis.ParseURL(redisURL)
 		if err != nil {
-			logger.Error("Failed to parse Redis URL", "", err, map[string]interface{}{
+			logger.Error("Failed to parse Redis URL", "RedisConnection", "", err, map[string]interface{}{
 				"url": redisURL,
 			})
 			return nil, fmt.Errorf("failed to parse Redis URL: %w", err)
@@ -49,12 +49,12 @@ func NewRedisClient(ctx context.Context) (*redis.Client, error) {
 		// Test the connection
 		_, err = client.Ping(ctx).Result()
 		if err != nil {
-			logger.Error("Failed to ping Redis", "", err, map[string]interface{}{
+			logger.Error("Failed to ping Redis", "RedisConnection", "", err, map[string]interface{}{
 				"attempt": attempt,
 			})
 			client.Close()
 			if attempt < maxRetries {
-				logger.Info("Retrying Redis connection", "", map[string]interface{}{
+				logger.Info("Retrying Redis connection", "RedisConnection", "", map[string]interface{}{
 					"delay_seconds": retryDelay.Seconds(),
 				})
 				time.Sleep(retryDelay)
@@ -63,7 +63,7 @@ func NewRedisClient(ctx context.Context) (*redis.Client, error) {
 			return nil, fmt.Errorf("failed to connect to Redis after %d attempts: %w", maxRetries, err)
 		}
 
-		logger.Info("Redis connection established successfully", "", nil)
+		logger.Info("Redis connection established successfully", "RedisConnection", "", nil)
 		return client, nil
 	}
 
@@ -72,7 +72,7 @@ func NewRedisClient(ctx context.Context) (*redis.Client, error) {
 
 // Consume continuously reads messages from the Redis queue and processes them with the provided handler
 func Consume(ctx context.Context, rdb *redis.Client, handler func(context.Context, OrderMessage) error) {
-	logger.Info("Starting queue consumer", "", map[string]interface{}{
+	logger.Info("Starting queue consumer", "QueueConsumer", "", map[string]interface{}{
 		"queue": queueName,
 	})
 
@@ -80,7 +80,7 @@ func Consume(ctx context.Context, rdb *redis.Client, handler func(context.Contex
 		// Check if context has been cancelled (for graceful shutdown)
 		select {
 		case <-ctx.Done():
-			logger.Info("Context cancelled, stopping consumer", "", nil)
+			logger.Info("Context cancelled, stopping consumer", "QueueConsumer", "", nil)
 			return
 		default:
 			// Continue processing
@@ -96,12 +96,12 @@ func Consume(ctx context.Context, rdb *redis.Client, handler func(context.Contex
 
 			// Context cancellation is expected during shutdown
 			if ctx.Err() != nil {
-				logger.Info("Context cancelled during BRPOP", "", nil)
+				logger.Info("Context cancelled during BRPOP", "QueueConsumer", "", nil)
 				return
 			}
 
 			// Unexpected error
-			logger.Error("Error reading from queue", "", err, map[string]interface{}{
+			logger.Error("Error reading from queue", "QueueConsumer", "", err, map[string]interface{}{
 				"queue": queueName,
 			})
 			time.Sleep(1 * time.Second) // Brief pause before retrying
@@ -110,7 +110,7 @@ func Consume(ctx context.Context, rdb *redis.Client, handler func(context.Contex
 
 		// BRPOP returns [queueName, message]
 		if len(result) != 2 {
-			logger.Warn("Unexpected BRPOP result length", "", map[string]interface{}{
+			logger.Warn("Unexpected BRPOP result length", "QueueConsumer", "", map[string]interface{}{
 				"result_length": len(result),
 			})
 			continue
@@ -122,13 +122,13 @@ func Consume(ctx context.Context, rdb *redis.Client, handler func(context.Contex
 		var msg OrderMessage
 		err = json.Unmarshal([]byte(messageJSON), &msg)
 		if err != nil {
-			logger.Error("Failed to parse message", "", err, map[string]interface{}{
+			logger.Error("Failed to parse message", "QueueConsumer", "", err, map[string]interface{}{
 				"message": messageJSON,
 			})
 			continue
 		}
 
-		logger.Info("Message received from queue", msg.CorrelationID, map[string]interface{}{
+		logger.Info("Message received from queue", "QueueConsumer", msg.CorrelationID, map[string]interface{}{
 			"order_id":   msg.OrderID,
 			"product_id": msg.ProductID,
 			"quantity":   msg.Quantity,
@@ -138,7 +138,7 @@ func Consume(ctx context.Context, rdb *redis.Client, handler func(context.Contex
 		// Process the message with the handler
 		err = handler(ctx, msg)
 		if err != nil {
-			logger.Error("Handler failed to process message", msg.CorrelationID, err, map[string]interface{}{
+			logger.Error("Handler failed to process message", "QueueConsumer", msg.CorrelationID, err, map[string]interface{}{
 				"order_id":   msg.OrderID,
 				"product_id": msg.ProductID,
 				"quantity":   msg.Quantity,
@@ -147,7 +147,7 @@ func Consume(ctx context.Context, rdb *redis.Client, handler func(context.Contex
 			continue
 		}
 
-		logger.Info("Message processed successfully", msg.CorrelationID, map[string]interface{}{
+		logger.Info("Message processed successfully", "QueueConsumer", msg.CorrelationID, map[string]interface{}{
 			"order_id":   msg.OrderID,
 			"product_id": msg.ProductID,
 			"quantity":   msg.Quantity,

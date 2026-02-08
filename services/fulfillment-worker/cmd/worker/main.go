@@ -26,25 +26,25 @@ func main() {
 	// Handle signals in a separate goroutine
 	go func() {
 		sig := <-sigChan
-		logger.Info(fmt.Sprintf("Received signal: %v", sig), "", nil)
-		logger.Info("Initiating graceful shutdown", "", nil)
+		logger.Info(fmt.Sprintf("Received signal: %v", sig), "Main", "", nil)
+		logger.Info("Initiating graceful shutdown", "Main", "", nil)
 		cancel()
 	}()
 
 	// Initialize database pool
-	logger.Info("Initializing database connection", "", nil)
+	logger.Info("Initializing database connection", "Main", "", nil)
 	pool, err := db.NewPool(ctx)
 	if err != nil {
-		logger.Error("Failed to initialize database pool", "", err, nil)
+		logger.Error("Failed to initialize database pool", "Main", "", err, nil)
 		os.Exit(1)
 	}
 	defer pool.Close()
 
 	// Initialize Redis client
-	logger.Info("Initializing Redis connection", "", nil)
+	logger.Info("Initializing Redis connection", "Main", "", nil)
 	rdb, err := queue.NewRedisClient(ctx)
 	if err != nil {
-		logger.Error("Failed to initialize Redis client", "", err, nil)
+		logger.Error("Failed to initialize Redis client", "Main", "", err, nil)
 		os.Exit(1)
 	}
 	defer rdb.Close()
@@ -52,22 +52,31 @@ func main() {
 	// Start metrics server in a goroutine
 	go metrics.StartMetricsServer(2112)
 
-	logger.Info("Fulfillment Worker started, consuming from fulfillment_queue", "", nil)
+	logger.Info("Fulfillment Worker started, consuming from fulfillment_queue", "Main", "", nil)
 
 	// Define order processing handler
 	processOrder := func(ctx context.Context, msg queue.OrderMessage) error {
 		startTime := time.Now()
+		orderID := fmt.Sprintf("%d", msg.OrderID)
 
-		logger.Info(fmt.Sprintf("Processing order %d", msg.OrderID), msg.CorrelationID, map[string]interface{}{
+		logger.Info(fmt.Sprintf("Processing order %d", msg.OrderID), "ProcessOrder", orderID, map[string]interface{}{
 			"order_id":   msg.OrderID,
 			"product_id": msg.ProductID,
 			"quantity":   msg.Quantity,
 		})
 
+		// Simulate realistic processing delays (~8% of the time)
+		if rand.Float64() < 0.08 {
+			delayMs := 500 + rand.Intn(1500)
+			logger.Warn("Processing taking longer than expected", "ProcessOrder", orderID, map[string]interface{}{
+				"duration_ms": delayMs,
+			})
+		}
+
 		// Update order status to "processing"
 		err := db.UpdateOrderStatus(ctx, pool, msg.OrderID, "processing")
 		if err != nil {
-			logger.Error("Failed to update order status to processing", msg.CorrelationID, err, map[string]interface{}{
+			logger.Error("Failed to update order status to processing", "ProcessOrder", orderID, err, map[string]interface{}{
 				"order_id": msg.OrderID,
 			})
 			metrics.ProcessingDuration.WithLabelValues("error").Observe(time.Since(startTime).Seconds())
@@ -80,10 +89,15 @@ func main() {
 		processingDelay := time.Duration(500+rand.Intn(1500)) * time.Millisecond
 		time.Sleep(processingDelay)
 
+		// Simulate temporary database latency (~3% of the time)
+		if rand.Float64() < 0.03 {
+			logger.Warn("Temporary database latency detected", "ProcessOrder", orderID, nil)
+		}
+
 		// Update order status to "fulfilled"
 		err = db.UpdateOrderStatus(ctx, pool, msg.OrderID, "fulfilled")
 		if err != nil {
-			logger.Error("Failed to update order status to fulfilled", msg.CorrelationID, err, map[string]interface{}{
+			logger.Error("Failed to update order status to fulfilled", "ProcessOrder", orderID, err, map[string]interface{}{
 				"order_id": msg.OrderID,
 			})
 			metrics.ProcessingDuration.WithLabelValues("error").Observe(time.Since(startTime).Seconds())
@@ -92,7 +106,7 @@ func main() {
 		}
 
 		duration := time.Since(startTime)
-		logger.Info(fmt.Sprintf("Order %d fulfilled", msg.OrderID), msg.CorrelationID, map[string]interface{}{
+		logger.Info(fmt.Sprintf("Order %d fulfilled", msg.OrderID), "ProcessOrder", orderID, map[string]interface{}{
 			"order_id":              msg.OrderID,
 			"product_id":            msg.ProductID,
 			"quantity":              msg.Quantity,
@@ -110,5 +124,5 @@ func main() {
 	queue.Consume(ctx, rdb, processOrder)
 
 	// This line is reached when context is cancelled
-	logger.Info("Fulfillment Worker shutting down", "", nil)
+	logger.Info("Fulfillment Worker shutting down", "Main", "", nil)
 }
