@@ -14,11 +14,18 @@ const client = redis.createClient({
   socket: {
     reconnectStrategy: (retries) => {
       if (retries > 10) {
-        logger.error('Redis max retries exceeded', { retries });
+        logger.error('Redis max retries exceeded', {
+          handler: 'RedisClient',
+          retries
+        });
         return new Error('Redis connection failed after max retries');
       }
       const delay = Math.min(retries * 100, 3000);
-      logger.warn('Redis reconnecting', { retries, delay_ms: delay });
+      logger.warn('Redis reconnecting', {
+        handler: 'RedisClient',
+        retries,
+        delay_ms: delay
+      });
       return delay;
     }
   }
@@ -28,27 +35,41 @@ const client = redis.createClient({
 let isConnected = false;
 
 client.on('connect', () => {
-  logger.info('Redis client connecting', { redis_url: REDIS_URL });
+  logger.info('Redis client connecting', {
+    handler: 'RedisClient',
+    redis_url: REDIS_URL
+  });
 });
 
 client.on('ready', () => {
   isConnected = true;
-  logger.info('Redis client ready', { redis_url: REDIS_URL });
+  logger.info('Redis client ready', {
+    handler: 'RedisClient',
+    redis_url: REDIS_URL
+  });
 });
 
 client.on('error', (err) => {
   isConnected = false;
-  logger.error('Redis client error', { error: err.message });
+  logger.error('Redis client error', {
+    handler: 'RedisClient',
+    error: err.message
+  });
 });
 
 client.on('end', () => {
   isConnected = false;
-  logger.warn('Redis client connection ended');
+  logger.warn('Redis client connection ended', {
+    handler: 'RedisClient'
+  });
 });
 
 // Connect to Redis
 client.connect().catch((err) => {
-  logger.error('Redis initial connection failed', { error: err.message });
+  logger.error('Redis initial connection failed', {
+    handler: 'RedisClient',
+    error: err.message
+  });
 });
 
 /**
@@ -57,7 +78,10 @@ client.connect().catch((err) => {
  */
 async function getCache(key) {
   if (!isConnected) {
-    logger.warn('Redis not connected, cache miss', { key });
+    logger.warn('Redis not connected, cache miss', {
+      handler: 'RedisClient',
+      key
+    });
     return null;
   }
 
@@ -68,7 +92,11 @@ async function getCache(key) {
     }
     return JSON.parse(value);
   } catch (err) {
-    logger.error('Redis GET failed', { key, error: err.message });
+    logger.error('Redis GET failed', {
+      handler: 'RedisClient',
+      key,
+      error: err.message
+    });
     return null;
   }
 }
@@ -79,7 +107,10 @@ async function getCache(key) {
  */
 async function setCache(key, value, ttlSeconds = 60) {
   if (!isConnected) {
-    logger.warn('Redis not connected, cache set skipped', { key });
+    logger.warn('Redis not connected, cache set skipped', {
+      handler: 'RedisClient',
+      key
+    });
     return false;
   }
 
@@ -90,7 +121,11 @@ async function setCache(key, value, ttlSeconds = 60) {
     });
     return true;
   } catch (err) {
-    logger.error('Redis SET failed', { key, error: err.message });
+    logger.error('Redis SET failed', {
+      handler: 'RedisClient',
+      key,
+      error: err.message
+    });
     return false;
   }
 }

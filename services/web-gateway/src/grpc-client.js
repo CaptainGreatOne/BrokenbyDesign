@@ -27,7 +27,10 @@ const client = new orderProto.OrderService(
   grpc.credentials.createInsecure()
 );
 
-logger.info('gRPC client initialized', { grpc_addr: GRPC_ADDR });
+logger.info('gRPC client initialized', {
+  handler: 'gRPCClient',
+  grpc_addr: GRPC_ADDR
+});
 
 /**
  * Map gRPC status codes to HTTP status codes
@@ -70,6 +73,14 @@ function createMetadata(correlationId) {
  */
 function createOrder(correlationId, productId, quantity) {
   return new Promise((resolve, reject) => {
+    // Realistic error simulation: gRPC channel reconnecting (~2% chance)
+    if (Math.random() < 0.02) {
+      logger.warn('gRPC channel reconnecting', {
+        handler: 'gRPC:CreateOrder',
+        correlation_id: correlationId
+      });
+    }
+
     const metadata = createMetadata(correlationId);
     const request = {
       product_id: productId,
@@ -80,6 +91,7 @@ function createOrder(correlationId, productId, quantity) {
       if (error) {
         const httpStatus = mapGrpcStatusToHttp(error.code);
         logger.error('gRPC createOrder failed', {
+          handler: 'gRPC:CreateOrder',
           correlation_id: correlationId,
           grpc_code: error.code,
           http_status: httpStatus,
@@ -93,6 +105,7 @@ function createOrder(correlationId, productId, quantity) {
       }
 
       logger.info('gRPC createOrder success', {
+        handler: 'gRPC:CreateOrder',
         correlation_id: correlationId,
         order_id: response.order_id
       });
@@ -106,6 +119,14 @@ function createOrder(correlationId, productId, quantity) {
  */
 function getOrder(correlationId, orderId) {
   return new Promise((resolve, reject) => {
+    // Realistic error simulation: gRPC channel reconnecting (~2% chance)
+    if (Math.random() < 0.02) {
+      logger.warn('gRPC channel reconnecting', {
+        handler: 'gRPC:GetOrder',
+        correlation_id: correlationId
+      });
+    }
+
     const metadata = createMetadata(correlationId);
     const request = {
       order_id: orderId
@@ -115,6 +136,7 @@ function getOrder(correlationId, orderId) {
       if (error) {
         const httpStatus = mapGrpcStatusToHttp(error.code);
         logger.error('gRPC getOrder failed', {
+          handler: 'gRPC:GetOrder',
           correlation_id: correlationId,
           order_id: orderId,
           grpc_code: error.code,
@@ -129,6 +151,7 @@ function getOrder(correlationId, orderId) {
       }
 
       logger.info('gRPC getOrder success', {
+        handler: 'gRPC:GetOrder',
         correlation_id: correlationId,
         order_id: orderId
       });
@@ -142,6 +165,14 @@ function getOrder(correlationId, orderId) {
  */
 function listOrders(correlationId, limit = 10) {
   return new Promise((resolve, reject) => {
+    // Realistic error simulation: gRPC channel reconnecting (~2% chance)
+    if (Math.random() < 0.02) {
+      logger.warn('gRPC channel reconnecting', {
+        handler: 'gRPC:ListOrders',
+        correlation_id: correlationId
+      });
+    }
+
     const metadata = createMetadata(correlationId);
     const request = {
       limit: limit
@@ -151,6 +182,7 @@ function listOrders(correlationId, limit = 10) {
       if (error) {
         const httpStatus = mapGrpcStatusToHttp(error.code);
         logger.error('gRPC listOrders failed', {
+          handler: 'gRPC:ListOrders',
           correlation_id: correlationId,
           limit: limit,
           grpc_code: error.code,
@@ -165,6 +197,7 @@ function listOrders(correlationId, limit = 10) {
       }
 
       logger.info('gRPC listOrders success', {
+        handler: 'gRPC:ListOrders',
         correlation_id: correlationId,
         order_count: response.orders ? response.orders.length : 0
       });

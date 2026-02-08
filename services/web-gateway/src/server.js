@@ -30,6 +30,7 @@ app.use((req, res, next) => {
 // Middleware: Request logging
 app.use((req, res, next) => {
   logger.info('Request received', {
+    handler: 'RequestMiddleware',
     correlation_id: req.correlationId,
     method: req.method,
     path: req.path,
@@ -48,6 +49,7 @@ app.use((req, res, next) => {
   res.on('finish', () => {
     const duration = Date.now() - startTime;
     logger.info('Request completed', {
+      handler: 'RequestMiddleware',
       correlation_id: req.correlationId,
       method: req.method,
       path: req.path,
@@ -88,6 +90,7 @@ app.use((err, req, res, next) => {
   const correlationId = req.correlationId || 'unknown';
 
   logger.error('Unhandled error', {
+    handler: 'ErrorMiddleware',
     correlation_id: correlationId,
     error: err.message,
     stack: err.stack
@@ -102,6 +105,7 @@ app.use((err, req, res, next) => {
 // Start server
 const server = app.listen(PORT, () => {
   logger.info('Web Gateway started', {
+    handler: 'Server',
     port: PORT,
     node_version: process.version,
     pid: process.pid
@@ -110,16 +114,22 @@ const server = app.listen(PORT, () => {
 
 // Graceful shutdown on SIGTERM
 process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
+  logger.info('SIGTERM received, shutting down gracefully', {
+    handler: 'Server'
+  });
 
   server.close(() => {
-    logger.info('Server closed, exiting');
+    logger.info('Server closed, exiting', {
+      handler: 'Server'
+    });
     process.exit(0);
   });
 
   // Force shutdown after 10 seconds
   setTimeout(() => {
-    logger.error('Forced shutdown after timeout');
+    logger.error('Forced shutdown after timeout', {
+      handler: 'Server'
+    });
     process.exit(1);
   }, 10000);
 });
