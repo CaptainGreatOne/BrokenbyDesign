@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Remove the setup tax so learning happens immediately. Services already exist and misbehave. Tools are pre-wired. You just learn.
-**Current focus:** Phase 2: Metrics & Dashboards
+**Current focus:** Phase 3: Centralized Logging
 
 ## Current Position
 
-Phase: 2 of 12 (Metrics & Dashboards)
-Plan: 4 of 4 in current phase
-Status: Phase complete
-Last activity: 2026-02-06 - Completed 02-04-PLAN.md (Grafana with Pre-Provisioned Dashboards)
+Phase: 3 of 12 (Centralized Logging)
+Plan: 3 of 4 in current phase
+Status: In progress
+Last activity: 2026-02-08 - Completed 03-03-PLAN.md (fulfillment-worker Plain Text Logging)
 
-Progress: [████░░░░░░] 18% (2 phases complete)
+Progress: [██░░░░░░░░] 26% (13 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: ~3 minutes
-- Total execution time: ~0.5 hours
+- Total execution time: ~0.6 hours
 
 **By Phase:**
 
@@ -29,10 +29,11 @@ Progress: [████░░░░░░] 18% (2 phases complete)
 |-------|-------|-------|----------|
 | 01-foundation-services | 6 | ~18 min | ~3 min |
 | 02-metrics-dashboards | 4 | ~10 min | ~2.5 min |
+| 03-centralized-logging | 1 | ~5 min | ~5 min |
 
 **Recent Trend:**
-- Last 8 plans: 01-04 (4 min), 01-05 (3 min), 01-06 (5 min), 02-01 (2 min), 02-02 (4 min), 02-03 (1.5 min), 02-04 (2.5 min)
-- Trend: Excellent velocity, Phase 2 complete with consistent sub-3min average
+- Last 8 plans: 01-05 (3 min), 01-06 (5 min), 02-01 (2 min), 02-02 (4 min), 02-03 (1.5 min), 02-04 (2.5 min), 03-01 (5 min - verification only)
+- Trend: Excellent velocity continues, Phase 3 started
 
 *Updated after each plan completion*
 
@@ -62,6 +63,10 @@ Recent decisions affecting current work:
 - Grafana datasource uid 'prometheus': Stable reference for dashboards, supports future Loki/Jaeger datasources
 - Service Overview as default home dashboard: Learner sees value immediately on first login
 - Grafana provisioning for multi-datasource: Directory structure supports adding Loki (Phase 3) and Jaeger (Phase 5) without modification
+- Plain text over JSON for logs: Loki's human-readable log browsing benefits from plain text format
+- Handler metadata pattern: Every logger call includes handler field for component identification and filtering
+- Probabilistic error simulation: 2-5% chance of realistic WARN/ERROR logs without breaking functionality
+- Log ID field priority: order_id → req_id → correlation_id extraction for consistent filtering
 
 ### Pending Todos
 
@@ -73,7 +78,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-06T22:34:14Z
-Stopped at: Completed 02-04-PLAN.md (Grafana with Pre-Provisioned Dashboards) - Phase 2 complete
+Last session: 2026-02-08T13:14:29Z
+Stopped at: Completed 03-01-PLAN.md (Plain Text Logging & Handler Metadata)
 Resume file: None
-Next: Begin Phase 3 planning (Centralized Logging with Loki + Promtail)
+Next: Continue Phase 3 - execute 03-02 (Loki & Promtail deployment)
