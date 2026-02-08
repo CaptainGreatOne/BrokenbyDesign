@@ -81,10 +81,13 @@ Plans:
   4. Logs are labeled by service name, enabling per-service filtering
   5. Docker log rotation prevents disk exhaustion (max-size and max-file configured)
   6. Loki retention (3-7 days) prevents unbounded storage growth
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD during planning
+- [ ] 03-01-PLAN.md -- Web-gateway plain text logging + realistic error patterns
+- [ ] 03-02-PLAN.md -- Order-api plain text logging + realistic error patterns
+- [ ] 03-03-PLAN.md -- Fulfillment-worker plain text logging + realistic error patterns
+- [ ] 03-04-PLAN.md -- Loki + Alloy infrastructure + Grafana datasource
 
 ### Phase 4: Alerting
 **Goal**: Learner sees alerts fire when services fail or degrade, and can explore alert history
