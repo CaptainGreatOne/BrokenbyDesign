@@ -2,6 +2,7 @@
 
 import os
 import time
+import random
 from typing import Optional
 from psycopg_pool import ConnectionPool
 from psycopg.rows import dict_row
@@ -37,7 +38,9 @@ def init_pool() -> ConnectionPool:
     for attempt in range(1, max_retries + 1):
         try:
             json_log("INFO", "Initializing database connection pool",
-                    attempt=attempt, max_retries=max_retries)
+                    handler="DatabasePool",
+                    attempt=attempt,
+                    max_retries=max_retries)
 
             _pool = ConnectionPool(
                 conninfo=conninfo,
@@ -51,19 +54,24 @@ def init_pool() -> ConnectionPool:
                 with conn.cursor() as cur:
                     cur.execute("SELECT 1")
 
-            json_log("INFO", "Database connection pool initialized successfully")
+            json_log("INFO", "Database connection pool initialized successfully",
+                    handler="DatabasePool")
             return _pool
 
         except Exception as e:
             json_log("ERROR", "Failed to initialize database pool",
-                    attempt=attempt, error=str(e))
+                    handler="DatabasePool",
+                    attempt=attempt,
+                    error=str(e))
 
             if attempt < max_retries:
                 json_log("INFO", "Retrying database connection",
+                        handler="DatabasePool",
                         delay_seconds=retry_delay)
                 time.sleep(retry_delay)
             else:
-                json_log("CRITICAL", "Max retries reached for database connection")
+                json_log("CRITICAL", "Max retries reached for database connection",
+                        handler="DatabasePool")
                 raise
 
     raise RuntimeError("Failed to initialize database pool")
@@ -82,6 +90,13 @@ def create_order(product_id: int, quantity: int) -> dict:
     """
     pool = init_pool()
 
+    # Simulate occasional connection pool wait time (~2% chance)
+    if random.random() < 0.02:
+        wait_ms = random.randint(100, 500)
+        json_log("WARN", "Connection pool wait time elevated",
+                handler="OrdersTable",
+                wait_ms=wait_ms)
+
     with pool.connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -96,6 +111,7 @@ def create_order(product_id: int, quantity: int) -> dict:
             conn.commit()
 
             json_log("INFO", "Order created",
+                    handler="OrdersTable",
                     order_id=result["id"],
                     product_id=product_id,
                     quantity=quantity)
@@ -128,9 +144,13 @@ def get_order(order_id: int) -> Optional[dict]:
             result = cur.fetchone()
 
             if result:
-                json_log("DEBUG", "Order retrieved", order_id=order_id)
+                json_log("DEBUG", "Order retrieved",
+                        handler="OrdersTable",
+                        order_id=order_id)
             else:
-                json_log("DEBUG", "Order not found", order_id=order_id)
+                json_log("DEBUG", "Order not found",
+                        handler="OrdersTable",
+                        order_id=order_id)
 
             return result
 
@@ -160,7 +180,10 @@ def list_orders(limit: int = 10) -> list[dict]:
             )
             results = cur.fetchall()
 
-            json_log("DEBUG", "Orders listed", count=len(results), limit=limit)
+            json_log("DEBUG", "Orders listed",
+                    handler="OrdersTable",
+                    count=len(results),
+                    limit=limit)
 
             return results
 
@@ -190,9 +213,13 @@ def get_product(product_id: int) -> Optional[dict]:
             result = cur.fetchone()
 
             if result:
-                json_log("DEBUG", "Product retrieved", product_id=product_id)
+                json_log("DEBUG", "Product retrieved",
+                        handler="ProductsTable",
+                        product_id=product_id)
             else:
-                json_log("DEBUG", "Product not found", product_id=product_id)
+                json_log("DEBUG", "Product not found",
+                        handler="ProductsTable",
+                        product_id=product_id)
 
             return result
 
@@ -226,10 +253,12 @@ def update_order_status(order_id: int, status: str) -> bool:
 
             if updated:
                 json_log("INFO", "Order status updated",
+                        handler="OrdersTable",
                         order_id=order_id,
                         status=status)
             else:
                 json_log("WARNING", "Order not found for status update",
+                        handler="OrdersTable",
                         order_id=order_id)
 
             return updated

@@ -5,6 +5,7 @@ import sys
 import signal
 import uuid
 import time
+import random
 from concurrent import futures
 
 import grpc
@@ -39,6 +40,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
             json_log("DEBUG", "Generated new correlation ID",
+                    handler="CreateOrder",
                     correlation_id=correlation_id)
 
         return correlation_id
@@ -58,11 +60,18 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
         correlation_id = self._get_correlation_id(context)
 
         json_log("INFO", "CreateOrder RPC called",
+                handler="CreateOrder",
                 product_id=request.product_id,
                 quantity=request.quantity,
                 correlation_id=correlation_id)
 
         try:
+            # Simulate occasional database connection pool pressure (~3% chance)
+            if random.random() < 0.03:
+                json_log("WARN", "Database connection pool pressure detected",
+                        handler="CreateOrder",
+                        correlation_id=correlation_id)
+
             # Check cache for product first
             product = redis_queue.get_cached_product(request.product_id)
 
@@ -72,6 +81,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
 
                 if product is None:
                     json_log("ERROR", "Product not found",
+                            handler="CreateOrder",
                             product_id=request.product_id,
                             correlation_id=correlation_id)
                     context.set_code(grpc.StatusCode.NOT_FOUND)
@@ -90,6 +100,15 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
             # Create order in database
             order = db.create_order(request.product_id, request.quantity)
 
+            # Simulate occasional slow query detection (~2% chance)
+            if random.random() < 0.02:
+                slow_duration_ms = random.randint(500, 2000)
+                json_log("WARN", "Slow query detected",
+                        handler="CreateOrder",
+                        order_id=order["id"],
+                        duration_ms=slow_duration_ms,
+                        correlation_id=correlation_id)
+
             # Enqueue fulfillment message to Redis
             redis_queue.enqueue_fulfillment(
                 order_id=order["id"],
@@ -99,6 +118,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
             )
 
             json_log("INFO", "Order created successfully",
+                    handler="CreateOrder",
                     order_id=order["id"],
                     status=order["status"],
                     correlation_id=correlation_id)
@@ -116,6 +136,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
 
         except Exception as e:
             json_log("ERROR", "Failed to create order",
+                    handler="CreateOrder",
                     error=str(e),
                     correlation_id=correlation_id)
             context.set_code(grpc.StatusCode.INTERNAL)
@@ -143,6 +164,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
         correlation_id = self._get_correlation_id(context)
 
         json_log("INFO", "GetOrder RPC called",
+                handler="GetOrder",
                 order_id=request.order_id,
                 correlation_id=correlation_id)
 
@@ -151,6 +173,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
 
             if order is None:
                 json_log("ERROR", "Order not found",
+                        handler="GetOrder",
                         order_id=request.order_id,
                         correlation_id=correlation_id)
                 context.set_code(grpc.StatusCode.NOT_FOUND)
@@ -164,6 +187,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
                 return order_pb2.Order()
 
             json_log("INFO", "Order retrieved successfully",
+                    handler="GetOrder",
                     order_id=order["id"],
                     correlation_id=correlation_id)
 
@@ -182,6 +206,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
 
         except Exception as e:
             json_log("ERROR", "Failed to get order",
+                    handler="GetOrder",
                     error=str(e),
                     correlation_id=correlation_id)
             context.set_code(grpc.StatusCode.INTERNAL)
@@ -211,6 +236,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
         limit = request.limit if request.limit > 0 else 10
 
         json_log("INFO", "ListOrders RPC called",
+                handler="ListOrders",
                 limit=limit,
                 correlation_id=correlation_id)
 
@@ -229,6 +255,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
             ]
 
             json_log("INFO", "Orders listed successfully",
+                    handler="ListOrders",
                     count=len(order_messages),
                     correlation_id=correlation_id)
 
@@ -241,6 +268,7 @@ class OrderServicer(order_pb2_grpc.OrderServiceServicer):
 
         except Exception as e:
             json_log("ERROR", "Failed to list orders",
+                    handler="ListOrders",
                     error=str(e),
                     correlation_id=correlation_id)
             context.set_code(grpc.StatusCode.INTERNAL)
@@ -259,18 +287,23 @@ def serve():
     # Initialize database pool
     try:
         db.init_pool()
-        json_log("INFO", "Database initialized")
+        json_log("INFO", "Database initialized", handler="Server")
     except Exception as e:
-        json_log("CRITICAL", "Failed to initialize database", error=str(e))
+        json_log("CRITICAL", "Failed to initialize database",
+                handler="Server",
+                error=str(e))
         sys.exit(1)
 
     # Start Prometheus metrics HTTP server
     metrics_port = int(os.getenv("METRICS_PORT", "8000"))
     try:
         start_metrics_server(port=metrics_port)
-        json_log("INFO", f"Metrics HTTP server started on port {metrics_port}")
+        json_log("INFO", f"Metrics HTTP server started on port {metrics_port}",
+                handler="MetricsServer")
     except Exception as e:
-        json_log("ERROR", "Failed to start metrics server", error=str(e))
+        json_log("ERROR", "Failed to start metrics server",
+                handler="MetricsServer",
+                error=str(e))
         # Non-fatal error, continue with gRPC server
 
     # Get gRPC port from environment
@@ -286,7 +319,8 @@ def serve():
 
     # Handle graceful shutdown
     def handle_sigterm(signum, frame):
-        json_log("INFO", "Received SIGTERM, shutting down gracefully")
+        json_log("INFO", "Received SIGTERM, shutting down gracefully",
+                handler="Server")
         server.stop(grace=5)
 
     signal.signal(signal.SIGTERM, handle_sigterm)
@@ -294,12 +328,14 @@ def serve():
 
     # Start server
     server.start()
-    json_log("INFO", f"Order API started on port {grpc_port}")
+    json_log("INFO", f"Order API started on port {grpc_port}",
+            handler="Server")
 
     try:
         server.wait_for_termination()
     except KeyboardInterrupt:
-        json_log("INFO", "Received keyboard interrupt, shutting down")
+        json_log("INFO", "Received keyboard interrupt, shutting down",
+                handler="Server")
         server.stop(grace=5)
 
 

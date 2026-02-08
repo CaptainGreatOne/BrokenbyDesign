@@ -3,6 +3,7 @@
 import os
 import json
 import time
+import random
 from typing import Optional
 import redis
 from logger import json_log
@@ -30,7 +31,10 @@ def _get_redis_client() -> redis.Redis:
     for attempt in range(1, max_retries + 1):
         try:
             json_log("INFO", "Connecting to Redis",
-                    attempt=attempt, max_retries=max_retries, url=redis_url)
+                    handler="RedisConnection",
+                    attempt=attempt,
+                    max_retries=max_retries,
+                    url=redis_url)
 
             _redis_client = redis.from_url(
                 redis_url,
@@ -42,19 +46,24 @@ def _get_redis_client() -> redis.Redis:
             # Test connection
             _redis_client.ping()
 
-            json_log("INFO", "Redis connection established successfully")
+            json_log("INFO", "Redis connection established successfully",
+                    handler="RedisConnection")
             return _redis_client
 
         except Exception as e:
             json_log("ERROR", "Failed to connect to Redis",
-                    attempt=attempt, error=str(e))
+                    handler="RedisConnection",
+                    attempt=attempt,
+                    error=str(e))
 
             if attempt < max_retries:
                 json_log("INFO", "Retrying Redis connection",
+                        handler="RedisConnection",
                         delay_seconds=retry_delay)
                 time.sleep(retry_delay)
             else:
-                json_log("CRITICAL", "Max retries reached for Redis connection")
+                json_log("CRITICAL", "Max retries reached for Redis connection",
+                        handler="RedisConnection")
                 raise
 
     raise RuntimeError("Failed to connect to Redis")
@@ -72,6 +81,15 @@ def enqueue_fulfillment(order_id: int, product_id: int, quantity: int, correlati
     """
     client = _get_redis_client()
 
+    # Simulate occasional Redis pipeline latency (~3% chance)
+    if random.random() < 0.03:
+        latency_ms = random.randint(50, 200)
+        json_log("WARN", "Redis pipeline latency elevated",
+                handler="RedisQueue",
+                order_id=order_id,
+                latency_ms=latency_ms,
+                correlation_id=correlation_id)
+
     message = {
         "order_id": order_id,
         "product_id": product_id,
@@ -83,6 +101,7 @@ def enqueue_fulfillment(order_id: int, product_id: int, quantity: int, correlati
         client.lpush("fulfillment_queue", json.dumps(message))
 
         json_log("INFO", "Fulfillment message enqueued",
+                handler="RedisQueue",
                 order_id=order_id,
                 product_id=product_id,
                 quantity=quantity,
@@ -90,6 +109,7 @@ def enqueue_fulfillment(order_id: int, product_id: int, quantity: int, correlati
 
     except Exception as e:
         json_log("ERROR", "Failed to enqueue fulfillment message",
+                handler="RedisQueue",
                 order_id=order_id,
                 error=str(e),
                 correlation_id=correlation_id)
@@ -114,15 +134,18 @@ def get_cached_product(product_id: int) -> Optional[dict]:
 
         if cached_data:
             json_log("DEBUG", "Product cache hit",
+                    handler="RedisCache",
                     product_id=product_id)
             return json.loads(cached_data)
         else:
             json_log("DEBUG", "Product cache miss",
+                    handler="RedisCache",
                     product_id=product_id)
             return None
 
     except Exception as e:
         json_log("ERROR", "Failed to retrieve cached product",
+                handler="RedisCache",
                 product_id=product_id,
                 error=str(e))
         return None
@@ -148,11 +171,13 @@ def cache_product(product_id: int, product_data: dict, ttl: int = 300) -> None:
         )
 
         json_log("DEBUG", "Product cached",
+                handler="RedisCache",
                 product_id=product_id,
                 ttl=ttl)
 
     except Exception as e:
         json_log("ERROR", "Failed to cache product",
+                handler="RedisCache",
                 product_id=product_id,
                 error=str(e))
         # Don't raise - caching failure shouldn't break the request
@@ -172,10 +197,12 @@ def invalidate_product_cache(product_id: int) -> None:
         client.delete(cache_key)
 
         json_log("DEBUG", "Product cache invalidated",
+                handler="RedisCache",
                 product_id=product_id)
 
     except Exception as e:
         json_log("ERROR", "Failed to invalidate product cache",
+                handler="RedisCache",
                 product_id=product_id,
                 error=str(e))
         # Don't raise - cache invalidation failure is not critical
