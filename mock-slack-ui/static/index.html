@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert Notifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: #ffffff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .alerts-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .alert-card {
+            background-color: #ffffff;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: box-shadow 0.2s;
+        }
+
+        .alert-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .alert-card.critical {
+            border-left-color: #d32f2f;
+        }
+
+        .alert-card.warning {
+            border-left-color: #f57c00;
+        }
+
+        .alert-card.info {
+            border-left-color: #1976d2;
+        }
+
+        .alert-card.resolved {
+            border-left-color: #388e3c;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .alert-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .alert-status.firing {
+            background-color: #ffebee;
+            color: #d32f2f;
+        }
+
+        .alert-status.firing.warning {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+
+        .alert-status.firing.info {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .alert-status.resolved {
+            background-color: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .alert-service {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .alert-name {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .alert-timestamp {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .alert-summary {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            background-color: #ffffff;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Alert Notifications</h1>
+        <div class="header-stats">
+            <div class="stat">
+                <span>Total Alerts:</span>
+                <span class="stat-value" id="total-count">0</span>
+            </div>
+            <div class="stat">
+                <span>Currently Firing:</span>
+                <span class="stat-value" id="firing-count">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="alerts-container" id="alerts-container">
+        <div class="loading">Loading alerts...</div>
+    </div>
+
+    <script>
+        let lastAlertCount = 0;
+
+        function getSeverityClass(alert) {
+            if (alert.status === 'resolved') {
+                return 'resolved';
+            }
+            return alert.severity || 'info';
+        }
+
+        function getStatusClass(alert) {
+            let classes = alert.status === 'resolved' ? 'resolved' : 'firing';
+            if (alert.status === 'firing' && alert.severity) {
+                classes += ' ' + alert.severity;
+            }
+            return classes;
+        }
+
+        function formatTimestamp(timestamp) {
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleString();
+            } catch (e) {
+                return timestamp;
+            }
+        }
+
+        function renderAlerts(alerts) {
+            const container = document.getElementById('alerts-container');
+
+            if (alerts.length === 0) {
+                container.innerHTML = '<div class="empty-state">No alerts received yet</div>';
+                return;
+            }
+
+            const firingCount = alerts.filter(a => a.status === 'firing').length;
+            document.getElementById('total-count').textContent = alerts.length;
+            document.getElementById('firing-count').textContent = firingCount;
+
+            const alertsHtml = alerts.map(alert => `
+                <div class="alert-card ${getSeverityClass(alert)}">
+                    <div class="alert-header">
+                        <div class="alert-title">
+                            <span class="alert-status ${getStatusClass(alert)}">${alert.status || 'unknown'}</span>
+                            <span class="alert-service">${alert.service || 'unknown'}</span>
+                            <span class="alert-name">${alert.alertname || 'unknown'}</span>
+                        </div>
+                        <div class="alert-timestamp">${formatTimestamp(alert.timestamp)}</div>
+                    </div>
+                    <div class="alert-summary">${alert.summary || 'No summary provided'}</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = alertsHtml;
+        }
+
+        async function fetchAlerts() {
+            try {
+                const response = await fetch('/api/alerts');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch alerts');
+                }
+                const alerts = await response.json();
+                renderAlerts(alerts);
+                lastAlertCount = alerts.length;
+            } catch (error) {
+                console.error('Error fetching alerts:', error);
+                const container = document.getElementById('alerts-container');
+                container.innerHTML = '<div class="empty-state">Error loading alerts. Retrying...</div>';
+            }
+        }
+
+        // Initial fetch
+        fetchAlerts();
+
+        // Auto-refresh every 5 seconds
+        setInterval(fetchAlerts, 5000);
+    </script>
+</body>
+</html>
