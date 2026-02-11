@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Remove the setup tax so learning happens immediately. Services already exist and misbehave. Tools are pre-wired. You just learn.
-**Current focus:** Phase 3: Centralized Logging
+**Current focus:** Phase 4: Alerting
 
 ## Current Position
 
-Phase: 3 of 12 (Centralized Logging)
-Plan: 4 of 4 in current phase
-Status: Phase complete
-Last activity: 2026-02-08 - Completed 03-04-PLAN.md (Loki & Alloy Deployment)
+Phase: 4 of 12 (Alerting)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-11 - Completed 04-01-PLAN.md (Service Health Metrics)
 
-Progress: [███░░░░░░░] 52% (14 plans completed)
+Progress: [████░░░░░░] 56% (15 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 15
 - Average duration: ~2.6 minutes
-- Total execution time: ~0.6 hours
+- Total execution time: ~0.65 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: [███░░░░░░░] 52% (14 plans completed)
 | 01-foundation-services | 6 | ~18 min | ~3 min |
 | 02-metrics-dashboards | 4 | ~10 min | ~2.5 min |
 | 03-centralized-logging | 4 | ~10.8 min | ~2.7 min |
+| 04-alerting | 1 | ~4.7 min | ~4.7 min |
 
 **Recent Trend:**
-- Last 8 plans: 02-02 (4 min), 02-03 (1.5 min), 02-04 (2.5 min), 03-01 (5 min), 03-02 (2.3 min), 03-03 (1.5 min), 03-04 (2 min)
-- Trend: Excellent velocity, Phase 3 complete at ~2.7 min average
+- Last 8 plans: 02-03 (1.5 min), 02-04 (2.5 min), 03-01 (5 min), 03-02 (2.3 min), 03-03 (1.5 min), 03-04 (2 min), 04-01 (4.7 min)
+- Trend: Strong velocity maintained, Phase 4 started
 
 *Updated after each plan completion*
 
@@ -74,6 +75,8 @@ Recent decisions affecting current work:
 - Loki monolithic mode: Simpler deployment for local learning environment
 - 72h retention: Balances learning exploration with storage constraints
 - Docker socket access for Alloy: Enables automatic container discovery
+- Service health gauge pattern: Gauge initialized to 1 at startup, updated by health endpoint for degraded service detection
+- Gauge persists value: Set once at startup, remains 1 unless explicitly changed, enabling ServiceUnhealthy vs InstanceDown distinction
 
 ### Pending Todos
 
@@ -85,7 +88,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-08T13:20:01Z
-Stopped at: Completed 03-04-PLAN.md (Loki & Alloy Deployment) - Phase 3 complete
+Last session: 2026-02-11T12:56:14Z
+Stopped at: Completed 04-01-PLAN.md (Service Health Metrics)
 Resume file: None
-Next: Phase 4 - Alerting & Notification (4 plans)
+Next: 04-02-PLAN.md (Alertmanager Setup)
