@@ -37,6 +37,14 @@ var QueueDepth = promauto.NewGauge(
 	},
 )
 
+// ServiceHealthy tracks the service health status: 1=healthy, 0=unhealthy
+var ServiceHealthy = promauto.NewGauge(
+	prometheus.GaugeOpts{
+		Name: "service_healthy",
+		Help: "Service health status (1=healthy, 0=unhealthy)",
+	},
+)
+
 // StartMetricsServer starts the HTTP server for Prometheus metrics
 func StartMetricsServer(port int) {
 	mux := http.NewServeMux()

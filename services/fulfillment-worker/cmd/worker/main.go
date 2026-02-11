@@ -52,6 +52,9 @@ func main() {
 	// Start metrics server in a goroutine
 	go metrics.StartMetricsServer(2112)
 
+	// Initialize service health gauge to 1 (healthy)
+	metrics.ServiceHealthy.Set(1)
+
 	logger.Info("Fulfillment Worker started, consuming from fulfillment_queue", "Main", "", nil)
 
 	// Define order processing handler
