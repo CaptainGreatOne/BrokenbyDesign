@@ -1,0 +1,37 @@
+// Discover Docker containers
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// Extract service name from container name, filter to app services
+discovery.relabel "logs" {
+  targets = discovery.docker.containers.targets
+
+  // Extract container name without leading slash
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "service"
+  }
+
+  // Only collect logs from application services
+  rule {
+    source_labels = ["service"]
+    regex         = "(web-gateway|order-api|fulfillment-worker)"
+    action        = "keep"
+  }
+}
+
+// Collect logs from Docker containers
+loki.source.docker "app_logs" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.logs.output
+  forward_to = [loki.write.endpoint.receiver]
+}
+
+// Write logs to Loki
+loki.write "endpoint" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
