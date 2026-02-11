@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 4 of 12 (Alerting)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-11 - Completed 04-01-PLAN.md (Service Health Metrics)
+Last activity: 2026-02-11 - Completed 04-02-PLAN.md (Webhook Notification Services)
 
-Progress: [████░░░░░░] 56% (15 plans completed)
+Progress: [████░░░░░░] 59% (16 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
-- Average duration: ~2.6 minutes
-- Total execution time: ~0.65 hours
+- Total plans completed: 16
+- Average duration: ~2.5 minutes
+- Total execution time: ~0.7 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [████░░░░░░] 56% (15 plans completed)
 | 01-foundation-services | 6 | ~18 min | ~3 min |
 | 02-metrics-dashboards | 4 | ~10 min | ~2.5 min |
 | 03-centralized-logging | 4 | ~10.8 min | ~2.7 min |
-| 04-alerting | 1 | ~4.7 min | ~4.7 min |
+| 04-alerting | 2 | ~7.7 min | ~3.9 min |
 
 **Recent Trend:**
-- Last 8 plans: 02-03 (1.5 min), 02-04 (2.5 min), 03-01 (5 min), 03-02 (2.3 min), 03-03 (1.5 min), 03-04 (2 min), 04-01 (4.7 min)
-- Trend: Strong velocity maintained, Phase 4 started
+- Last 8 plans: 02-04 (2.5 min), 03-01 (5 min), 03-02 (2.3 min), 03-03 (1.5 min), 03-04 (2 min), 04-01 (4.7 min), 04-02 (3 min)
+- Trend: Excellent velocity, Phase 4 progressing well
 
 *Updated after each plan completion*
 
@@ -77,6 +77,14 @@ Recent decisions affecting current work:
 - Docker socket access for Alloy: Enables automatic container discovery
 - Service health gauge pattern: Gauge initialized to 1 at startup, updated by health endpoint for degraded service detection
 - Gauge persists value: Set once at startup, remains 1 unless explicitly changed, enabling ServiceUnhealthy vs InstanceDown distinction
+- Flask for webhook receivers with gunicorn: Production-ready Python server for Alertmanager webhooks
+- In-memory alert storage with FIFO: Max 100 for webhook-receiver, 200 for mock Slack UI
+- Thread-safe alert storage: threading.Lock for concurrent webhook access
+- Webhook receiver port 5001: Avoids Flask dev server default 5000 conflicts
+- Mock Slack UI port 8080: Standard HTTP port for notification UI
+- Mock Slack receives webhooks directly: Teaches full webhook flow without proxying
+- Severity color coding: critical=red, warning=orange, info=blue, resolved=green
+- Auto-refresh polling: 5-second interval via JavaScript fetch
 
 ### Pending Todos
 
@@ -88,7 +96,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-11T12:56:14Z
-Stopped at: Completed 04-01-PLAN.md (Service Health Metrics)
+Last session: 2026-02-11T12:57:23Z
+Stopped at: Completed 04-02-PLAN.md (Webhook Notification Services)
 Resume file: None
-Next: 04-02-PLAN.md (Alertmanager Setup)
+Next: 04-03-PLAN.md (Docker Compose Integration)
