@@ -1,0 +1,55 @@
+groups:
+  - name: service_health
+    interval: 15s
+    rules:
+      # 1. InstanceDown - Service completely unreachable by Prometheus
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "Instance {{ $labels.instance }} is down"
+          description: "{{ $labels.job }} instance {{ $labels.instance }} has been unreachable for more than 1 minute."
+
+      # 2. ServiceUnhealthy - Instance reachable but health check fails
+      - alert: ServiceUnhealthy
+        expr: service_healthy == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "Service {{ $labels.job }} is unhealthy"
+          description: "{{ $labels.job }} instance {{ $labels.instance }} is running but reporting unhealthy status."
+
+      # 3. HighErrorRate - Too many 5xx responses (>5% for 5 minutes)
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum by (job) (rate(http_requests_total{status_code=~"5.."}[5m]))
+            /
+            sum by (job) (rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "{{ $labels.job }} has {{ $value | humanizePercentage }} 5xx errors (threshold: 5%)."
+
+      # 4. HighLatency - p95 latency exceeds 1 second for 5 minutes
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum by (job, le) (rate(http_request_duration_seconds_bucket[5m]))
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "High latency on {{ $labels.job }}"
+          description: "{{ $labels.job }} p95 latency is {{ $value | humanizeDuration }} (threshold: 1s)."
