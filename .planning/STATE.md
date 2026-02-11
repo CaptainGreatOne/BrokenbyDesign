@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 4 of 12 (Alerting)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-11 - Completed 04-02-PLAN.md (Webhook Notification Services)
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-02-11 - Completed 04-03-PLAN.md (Alerting Infrastructure)
 
-Progress: [████░░░░░░] 59% (16 plans completed)
+Progress: [█████░░░░░] 63% (17 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
-- Average duration: ~2.5 minutes
-- Total execution time: ~0.7 hours
+- Total plans completed: 17
+- Average duration: ~3.1 minutes
+- Total execution time: ~0.9 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [████░░░░░░] 59% (16 plans completed)
 | 01-foundation-services | 6 | ~18 min | ~3 min |
 | 02-metrics-dashboards | 4 | ~10 min | ~2.5 min |
 | 03-centralized-logging | 4 | ~10.8 min | ~2.7 min |
-| 04-alerting | 2 | ~7.7 min | ~3.9 min |
+| 04-alerting | 3 | ~18.5 min | ~6.2 min |
 
 **Recent Trend:**
-- Last 8 plans: 02-04 (2.5 min), 03-01 (5 min), 03-02 (2.3 min), 03-03 (1.5 min), 03-04 (2 min), 04-01 (4.7 min), 04-02 (3 min)
-- Trend: Excellent velocity, Phase 4 progressing well
+- Last 8 plans: 03-01 (5 min), 03-02 (2.3 min), 03-03 (1.5 min), 03-04 (2 min), 04-01 (4.7 min), 04-02 (3 min), 04-03 (10.8 min)
+- Trend: Phase 4 complete, 04-03 took longer due to healthcheck debugging but all issues resolved
 
 *Updated after each plan completion*
 
@@ -85,6 +85,12 @@ Recent decisions affecting current work:
 - Mock Slack receives webhooks directly: Teaches full webhook flow without proxying
 - Severity color coding: critical=red, warning=orange, info=blue, resolved=green
 - Auto-refresh polling: 5-second interval via JavaScript fetch
+- PromQL alert rules target HTTP metrics: HighErrorRate and HighLatency use http_requests_total and http_request_duration_seconds_bucket from web-gateway (HTTP entry point)
+- ServiceUnhealthy vs InstanceDown distinction: ServiceUnhealthy (service_healthy==0) for degraded services, InstanceDown (up==0) for unreachable services
+- Severity-based routing: Critical alerts have faster group_wait (5s vs 10s) and repeat_interval (1h vs 4h)
+- Alert grouping by alertname and service: Deduplicates multiple instances of same alert from same service
+- Python urllib healthchecks: Use Python's built-in urllib for healthchecks in python:slim containers (wget not available)
+- Loki healthcheck disabled: Distroless image has no shell utilities, use service_started dependency condition
 
 ### Pending Todos
 
@@ -96,7 +102,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-11T12:57:23Z
-Stopped at: Completed 04-02-PLAN.md (Webhook Notification Services)
+Last session: 2026-02-11T13:11:08Z
+Stopped at: Completed 04-03-PLAN.md (Alerting Infrastructure) - Phase 4 complete
 Resume file: None
-Next: 04-03-PLAN.md (Docker Compose Integration)
+Next: Phase 5 planning (Distributed Tracing)
