@@ -7,7 +7,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('./logger');
 const routes = require('./routes');
-const { register, httpRequestCounter, httpRequestDuration } = require('./metrics');
+const { register, httpRequestCounter, httpRequestDuration, serviceHealthy } = require('./metrics');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -110,6 +110,9 @@ const server = app.listen(PORT, () => {
     node_version: process.version,
     pid: process.pid
   });
+
+  // Initialize service health gauge to 1 (healthy)
+  serviceHealthy.set(1);
 });
 
 // Graceful shutdown on SIGTERM

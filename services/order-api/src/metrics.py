@@ -1,6 +1,6 @@
 """Prometheus metrics configuration for order-api service."""
 
-from prometheus_client import Counter, Histogram, start_http_server
+from prometheus_client import Counter, Histogram, Gauge, start_http_server
 
 # gRPC request counter with labels: method, status
 grpc_requests_total = Counter(
@@ -22,6 +22,12 @@ grpc_request_duration_seconds = Histogram(
 orders_created_total = Counter(
     'orders_created_total',
     'Total number of orders created successfully'
+)
+
+# Service health gauge: 1=healthy, 0=unhealthy
+service_healthy = Gauge(
+    'service_healthy',
+    'Service health status (1=healthy, 0=unhealthy)'
 )
 
 

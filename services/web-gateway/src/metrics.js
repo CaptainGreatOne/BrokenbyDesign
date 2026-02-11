@@ -29,8 +29,16 @@ const httpRequestDuration = new client.Histogram({
   registers: [register]
 });
 
+// Service health gauge: 1=healthy, 0=unhealthy
+const serviceHealthy = new client.Gauge({
+  name: 'service_healthy',
+  help: 'Service health status (1=healthy, 0=unhealthy)',
+  registers: [register]
+});
+
 module.exports = {
   register,
   httpRequestCounter,
-  httpRequestDuration
+  httpRequestDuration,
+  serviceHealthy
 };

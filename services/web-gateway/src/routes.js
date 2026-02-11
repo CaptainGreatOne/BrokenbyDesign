@@ -6,6 +6,7 @@
 const express = require('express');
 const grpcClient = require('./grpc-client');
 const logger = require('./logger');
+const { serviceHealthy } = require('./metrics');
 
 const router = express.Router();
 
@@ -189,11 +190,29 @@ router.get('/orders', async (req, res) => {
  * GET /health - Health check endpoint
  */
 router.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    service: 'web-gateway',
-    uptime: process.uptime()
-  });
+  try {
+    // Check if gRPC client is available
+    // Note: grpcClient is required but actual connectivity check would require
+    // making a gRPC call. For simplicity, we set gauge to 1 as long as the
+    // service is running and responding to health checks.
+    // The gauge will be 0 only if explicitly set (e.g., during failure scenarios)
+
+    serviceHealthy.set(1);
+
+    res.status(200).json({
+      status: 'healthy',
+      service: 'web-gateway',
+      uptime: process.uptime()
+    });
+  } catch (error) {
+    // If health check fails, set gauge to 0
+    serviceHealthy.set(0);
+    res.status(503).json({
+      status: 'unhealthy',
+      service: 'web-gateway',
+      error: error.message
+    });
+  }
 });
 
 /**

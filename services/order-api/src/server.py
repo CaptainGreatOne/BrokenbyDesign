@@ -18,7 +18,7 @@ import order_pb2_grpc
 import db
 import redis_queue
 from logger import json_log
-from metrics import start_metrics_server, grpc_requests_total, grpc_request_duration_seconds, orders_created_total
+from metrics import start_metrics_server, grpc_requests_total, grpc_request_duration_seconds, orders_created_total, service_healthy
 
 
 class OrderServicer(order_pb2_grpc.OrderServiceServicer):
@@ -330,6 +330,9 @@ def serve():
     server.start()
     json_log("INFO", f"Order API started on port {grpc_port}",
             handler="Server")
+
+    # Initialize service health gauge to 1 (healthy)
+    service_healthy.set(1)
 
     try:
         server.wait_for_termination()
