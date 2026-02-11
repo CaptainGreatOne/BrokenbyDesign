@@ -14,8 +14,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation Services** - Pre-built polyglot microservices with automated traffic and one-command startup
 - [x] **Phase 2: Metrics & Dashboards** - Prometheus + Grafana with working dashboards showing service health
-- [ ] **Phase 3: Centralized Logging** - Loki + Promtail for aggregated log search across all services
-- [ ] **Phase 4: Alerting** - Alertmanager with rules that detect and route common failure patterns
+- [x] **Phase 3: Centralized Logging** - Loki + Promtail for aggregated log search across all services
+- [x] **Phase 4: Alerting** - Alertmanager with rules that detect and route common failure patterns
 - [ ] **Phase 5: Distributed Tracing** - Jaeger + OpenTelemetry for cross-service request visualization
 - [ ] **Phase 6: Chaos Engineering** - Controllable failure injection showing observable impact on metrics/logs/traces
 - [ ] **Phase 7: Event Streaming** - Kafka with producers, consumers, and observable message flow
@@ -99,10 +99,12 @@ Plans:
   3. Alerts appear in both Alertmanager UI and Grafana when conditions trigger
   4. Alertmanager groups and deduplicates related alerts
   5. Learner can view current firing alerts and historical alert activity
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD during planning
+- [x] 04-01-PLAN.md -- Service health gauge metrics for all services
+- [x] 04-02-PLAN.md -- Webhook receiver + mock Slack notification UI
+- [x] 04-03-PLAN.md -- Alertmanager + Prometheus rules + Docker Compose wiring
 
 ### Phase 5: Distributed Tracing
 **Goal**: Learner can view the complete path of a request across multiple services with timing breakdowns

@@ -38,11 +38,11 @@
 
 ### Alerting
 
-- [ ] **ALRT-01**: Alertmanager receives alerts from Prometheus
-- [ ] **ALRT-02**: Pre-configured alert rules detect common issues (high error rate, high latency, service down)
-- [ ] **ALRT-03**: Alerts fire and are visible in both Alertmanager UI and Grafana
-- [ ] **ALRT-04**: Alertmanager groups, deduplicates, and routes alerts
-- [ ] **ALRT-05**: Learner can view alert history and current firing alerts
+- [x] **ALRT-01**: Alertmanager receives alerts from Prometheus
+- [x] **ALRT-02**: Pre-configured alert rules detect common issues (high error rate, high latency, service down)
+- [x] **ALRT-03**: Alerts fire and are visible in both Alertmanager UI and Grafana
+- [x] **ALRT-04**: Alertmanager groups, deduplicates, and routes alerts
+- [x] **ALRT-05**: Learner can view alert history and current firing alerts
 
 ### Distributed Tracing
 
@@ -158,11 +158,11 @@
 | LOGG-04 | Phase 3 | Pending |
 | LOGG-05 | Phase 3 | Pending |
 | LOGG-06 | Phase 3 | Pending |
-| ALRT-01 | Phase 4 | Pending |
-| ALRT-02 | Phase 4 | Pending |
-| ALRT-03 | Phase 4 | Pending |
-| ALRT-04 | Phase 4 | Pending |
-| ALRT-05 | Phase 4 | Pending |
+| ALRT-01 | Phase 4 | Complete |
+| ALRT-02 | Phase 4 | Complete |
+| ALRT-03 | Phase 4 | Complete |
+| ALRT-04 | Phase 4 | Complete |
+| ALRT-05 | Phase 4 | Complete |
 | TRAC-01 | Phase 5 | Pending |
 | TRAC-02 | Phase 5 | Pending |
 | TRAC-03 | Phase 5 | Pending |
