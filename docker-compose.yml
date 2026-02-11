@@ -331,7 +331,7 @@ services:
       prometheus:
         condition: service_healthy
       loki:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget --spider -q http://localhost:3000/api/health || exit 1"]
       interval: 5s
@@ -395,7 +395,7 @@ services:
       alertmanager:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:5001/health || exit 1"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5001/health')\" || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -421,7 +421,7 @@ services:
       alertmanager:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8080/health')\" || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -478,7 +478,7 @@ services:
       - "12345:12345"
     depends_on:
       loki:
-        condition: service_healthy
+        condition: service_started
     deploy:
       resources:
         limits:
