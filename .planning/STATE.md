@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 5 of 12 (Distributed Tracing)
-Plan: 2 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-12 - Completed 05-02-PLAN.md (Instrument Web-Gateway)
+Last activity: 2026-02-12 - Completed 05-03-PLAN.md (Instrument Order-API)
 
-Progress: [█████░░░░░] 70% (19 plans completed)
+Progress: [██████░░░░] 74% (20 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
-- Average duration: ~3.0 minutes
-- Total execution time: ~1.01 hours
+- Total plans completed: 20
+- Average duration: ~3.1 minutes
+- Total execution time: ~1.05 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [█████░░░░░] 70% (19 plans completed)
 | 02-metrics-dashboards | 4 | ~10 min | ~2.5 min |
 | 03-centralized-logging | 4 | ~10.8 min | ~2.7 min |
 | 04-alerting | 3 | ~18.5 min | ~6.2 min |
-| 05-distributed-tracing | 2 | ~7 min | ~3.5 min |
+| 05-distributed-tracing | 3 | ~12 min | ~4 min |
 
 **Recent Trend:**
-- Last 8 plans: 03-03 (1.5 min), 03-04 (2 min), 04-01 (4.7 min), 04-02 (3 min), 04-03 (10.8 min), 05-01 (2 min), 05-02 (5 min)
-- Trend: Phase 5 progressing, 05-02 verified pre-committed work and created summary
+- Last 8 plans: 03-04 (2 min), 04-01 (4.7 min), 04-02 (3 min), 04-03 (10.8 min), 05-01 (2 min), 05-02 (5 min), 05-03 (5 min)
+- Trend: Phase 5 progressing, continuation pattern working well (verifying pre-committed work + completing remaining tasks)
 
 *Updated after each plan completion*
 
@@ -97,11 +97,12 @@ Recent decisions affecting current work:
 - 100% probabilistic sampling in dev: All traces sampled for learning visibility, production would use 10% or lower
 - Badger storage with 72h retention: Matches Loki retention for consistency across observability tools
 - Tracing profile in Docker Compose: Optional trace infrastructure (~1GB) activated with --profile tracing or --profile full
-- OTel SDK initialization via --require flag: Node.js pattern for loading tracing.js before application code to enable auto-instrumentation
-- Disable fs instrumentation: Reduce trace noise by disabling file system operation spans in local development
-- Trace context in logs: Extract trace_id and span_id from active span and include in log lines for Loki-Jaeger correlation
-- Exemplars on Prometheus metrics: Enable exemplars on counters and histograms to link high-latency metrics to specific traces
-- Manual semantic spans: Wrap business logic (create-order, get-order, list-orders) in named spans for trace clarity
+- OTel SDK initialization patterns: Python uses dedicated tracing.py imported first, Node.js uses --require flag to load before app code
+- Semantic spans for business logic: Use descriptive span names (create-order, get-order, enqueue-fulfillment) vs generic auto-instrumentation spans
+- W3C traceparent in queue payloads: Format 00-{trace_id}-{span_id}-{flags} enables linked trace propagation across async boundaries
+- Trace context in logs: Extract trace_id/span_id from active span and inject into structured logs for trace-log correlation in Loki/Jaeger
+- Exemplars on metrics: Attach trace IDs to metric observations enabling jump from metrics spike to specific traces in Grafana
+- Disable fs instrumentation: Reduce trace noise by disabling file system operation spans in local development (Node.js)
 
 ### Pending Todos
 
@@ -113,7 +114,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-12T13:53:09Z
-Stopped at: Completed 05-02-PLAN.md (Instrument Web-Gateway)
+Last session: 2026-02-12T13:49:42Z
+Stopped at: Completed 05-03-PLAN.md (Instrument Order-API)
 Resume file: None
-Next: Execute 05-03-PLAN.md (Instrument order-api)
+Next: Execute 05-04-PLAN.md (Instrument Fulfillment-Worker) or 05-05-PLAN.md (Verify Trace Correlation)
