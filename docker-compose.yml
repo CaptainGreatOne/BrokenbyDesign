@@ -1,5 +1,6 @@
 # Resource budget: ~7.6GB total (core services ~5GB + observability ~2.6GB), ~4.4GB reserved for profile services
-# New alerting services: alertmanager (256M), webhook-receiver (128M), mock-slack-ui (128M) = ~512M
+# Alerting services: alertmanager (256M), webhook-receiver (128M), mock-slack-ui (128M) = ~512M
+# Tracing services: jaeger (512M), otel-collector (512M) = ~1GB for tracing profile
 
 services:
   # Infrastructure Services
@@ -493,12 +494,75 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Tracing Services
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    restart: unless-stopped
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=badger
+      - BADGER_EPHEMERAL=false
+      - BADGER_DIRECTORY_VALUE=/badger/data
+      - BADGER_DIRECTORY_KEY=/badger/key
+      - BADGER_SPAN_STORE_TTL=72h
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317"         # OTLP gRPC (internal only)
+    volumes:
+      - jaeger-badger:/badger
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:16686/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    profiles: [tracing, full]
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector/config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4317:4317"  # OTLP gRPC
+      - "4318:4318"  # OTLP HTTP
+    depends_on:
+      jaeger:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:13133/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    profiles: [tracing, full]
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   postgres-data:
   prometheus-data:
   grafana-data:
   loki-data:
   alertmanager-data:
+  jaeger-badger:
 
 # Profiles:
 #   (default)  - Core services only (3 microservices + postgres + redis + nginx + traffic-gen)
