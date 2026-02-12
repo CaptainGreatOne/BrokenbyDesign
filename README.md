@@ -1,6 +1,6 @@
 # 🧪 Broken by Design (WIP)
 
-> A hands-on learning environment for observability and CI/CD — where the systems already exist, and already misbehave.
+> A hands-on learning environment for observability and CI/CD — where the systems already exist, and already misbehaves.
 
 ⚠️ **Status: Under Construction**  
 This project is actively evolving. Expect rough edges, incomplete lessons, and breaking changes.
@@ -102,3 +102,4 @@ This is a **lab**, not a product.
 ## 📄 License
 
 TBD
+
