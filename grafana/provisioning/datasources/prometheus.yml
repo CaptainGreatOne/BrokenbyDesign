@@ -10,3 +10,7 @@ datasources:
     editable: false
     jsonData:
       timeInterval: 15s
+      httpMethod: POST
+      exemplarTraceIdDestinations:
+        - name: traceID
+          datasourceUid: jaeger
