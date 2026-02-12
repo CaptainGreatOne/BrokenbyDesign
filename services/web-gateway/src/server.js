@@ -5,6 +5,7 @@
 
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
+const { trace } = require('@opentelemetry/api');
 const logger = require('./logger');
 const routes = require('./routes');
 const { register, httpRequestCounter, httpRequestDuration, serviceHealthy } = require('./metrics');
@@ -69,8 +70,13 @@ app.use((req, res, next) => {
     const duration = (Date.now() - start) / 1000; // Convert to seconds
     const route = req.route?.path || req.path;
 
-    httpRequestCounter.labels(req.method, route, res.statusCode).inc();
-    httpRequestDuration.labels(req.method, route, res.statusCode).observe(duration);
+    // Extract trace ID for exemplars
+    const activeSpan = trace.getActiveSpan();
+    const traceId = activeSpan?.spanContext()?.traceId;
+    const exemplar = traceId ? { traceID: traceId } : undefined;
+
+    httpRequestCounter.labels(req.method, route, res.statusCode).inc(exemplar);
+    httpRequestDuration.labels(req.method, route, res.statusCode).observe(duration, exemplar);
   });
 
   next();

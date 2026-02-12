@@ -16,7 +16,8 @@ const httpRequestCounter = new client.Counter({
   name: 'http_requests_total',
   help: 'Total number of HTTP requests',
   labelNames: ['method', 'route', 'status_code'],
-  registers: [register]
+  registers: [register],
+  enableExemplars: true
 });
 
 // HTTP request duration histogram with labels: method, route, status_code
@@ -26,7 +27,8 @@ const httpRequestDuration = new client.Histogram({
   help: 'Duration of HTTP requests in seconds',
   labelNames: ['method', 'route', 'status_code'],
   buckets: [0.001, 0.01, 0.1, 0.5, 1, 2, 5],
-  registers: [register]
+  registers: [register],
+  enableExemplars: true
 });
 
 // Service health gauge: 1=healthy, 0=unhealthy

@@ -4,28 +4,38 @@
  */
 
 const express = require('express');
+const { trace, SpanStatusCode } = require('@opentelemetry/api');
 const grpcClient = require('./grpc-client');
 const logger = require('./logger');
 const { serviceHealthy } = require('./metrics');
 
 const router = express.Router();
+const tracer = trace.getTracer('web-gateway');
 
 /**
  * POST /orders - Create a new order
  */
 router.post('/orders', async (req, res) => {
   const correlationId = req.correlationId;
+  const { product_id, quantity } = req.body;
+
+  // Create semantic span for business logic
+  const span = tracer.startSpan('create-order', {
+    attributes: {
+      'order.product_id': product_id,
+      'order.quantity': quantity
+    }
+  });
 
   try {
     // Validate request body
-    const { product_id, quantity } = req.body;
-
     if (!product_id || typeof product_id !== 'number') {
       logger.warn('Invalid product_id', {
         handler: '/api/orders',
         correlation_id: correlationId,
         product_id
       });
+      span.setStatus({ code: SpanStatusCode.ERROR, message: 'Invalid product_id' });
       return res.status(400).json({
         error: 'product_id is required and must be an integer'
       });
@@ -37,6 +47,7 @@ router.post('/orders', async (req, res) => {
         correlation_id: correlationId,
         quantity
       });
+      span.setStatus({ code: SpanStatusCode.ERROR, message: 'Invalid quantity' });
       return res.status(400).json({
         error: 'quantity is required and must be a positive integer'
       });
@@ -74,6 +85,7 @@ router.post('/orders', async (req, res) => {
       quantity
     });
 
+    span.setStatus({ code: SpanStatusCode.OK });
     res.status(201).json({
       order_id: response.order_id,
       status: response.status
@@ -87,9 +99,14 @@ router.post('/orders', async (req, res) => {
       http_status: httpStatus
     });
 
+    span.recordException(error);
+    span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+
     res.status(httpStatus).json({
       error: error.message
     });
+  } finally {
+    span.end();
   }
 });
 
@@ -98,16 +115,23 @@ router.post('/orders', async (req, res) => {
  */
 router.get('/orders/:id', async (req, res) => {
   const correlationId = req.correlationId;
+  const orderId = parseInt(req.params.id, 10);
+
+  // Create semantic span for business logic
+  const span = tracer.startSpan('get-order', {
+    attributes: {
+      'order.id': orderId
+    }
+  });
 
   try {
-    const orderId = parseInt(req.params.id, 10);
-
     if (isNaN(orderId)) {
       logger.warn('Invalid order_id', {
         handler: '/api/orders/:id',
         correlation_id: correlationId,
         id: req.params.id
       });
+      span.setStatus({ code: SpanStatusCode.ERROR, message: 'Invalid order_id' });
       return res.status(400).json({
         error: 'order_id must be a valid integer'
       });
@@ -122,6 +146,7 @@ router.get('/orders/:id', async (req, res) => {
       order_id: orderId
     });
 
+    span.setStatus({ code: SpanStatusCode.OK });
     res.status(200).json(order);
   } catch (error) {
     const httpStatus = error.httpStatus || 500;
@@ -133,9 +158,14 @@ router.get('/orders/:id', async (req, res) => {
       http_status: httpStatus
     });
 
+    span.recordException(error);
+    span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+
     res.status(httpStatus).json({
       error: error.message
     });
+  } finally {
+    span.end();
   }
 });
 
@@ -145,19 +175,26 @@ router.get('/orders/:id', async (req, res) => {
 router.get('/orders', async (req, res) => {
   const correlationId = req.correlationId;
 
+  // Parse limit query parameter
+  let limit = parseInt(req.query.limit, 10) || 10;
+
+  // Enforce max limit
+  if (limit > 100) {
+    limit = 100;
+  }
+
+  if (limit < 1) {
+    limit = 10;
+  }
+
+  // Create semantic span for business logic
+  const span = tracer.startSpan('list-orders', {
+    attributes: {
+      'order.limit': limit
+    }
+  });
+
   try {
-    // Parse limit query parameter
-    let limit = parseInt(req.query.limit, 10) || 10;
-
-    // Enforce max limit
-    if (limit > 100) {
-      limit = 100;
-    }
-
-    if (limit < 1) {
-      limit = 10;
-    }
-
     // Call gRPC ListOrders
     const response = await grpcClient.listOrders(correlationId, limit);
 
@@ -168,6 +205,7 @@ router.get('/orders', async (req, res) => {
       limit
     });
 
+    span.setStatus({ code: SpanStatusCode.OK });
     res.status(200).json({
       orders: response.orders || []
     });
@@ -180,9 +218,14 @@ router.get('/orders', async (req, res) => {
       http_status: httpStatus
     });
 
+    span.recordException(error);
+    span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+
     res.status(httpStatus).json({
       error: error.message
     });
+  } finally {
+    span.end();
   }
 });
 

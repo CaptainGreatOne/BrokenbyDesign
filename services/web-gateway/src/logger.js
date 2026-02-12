@@ -4,6 +4,8 @@
  * Format: {timestamp} {LEVEL} web-gateway {handler} {id} {key=value pairs} {message}
  */
 
+const { trace } = require('@opentelemetry/api');
+
 function log(level, message, metadata = {}) {
   const timestamp = new Date().toISOString();
 
@@ -12,6 +14,11 @@ function log(level, message, metadata = {}) {
 
   // Extract handler (default to empty string)
   const handler = metadata.handler || '';
+
+  // Extract trace context from active span
+  const span = trace.getActiveSpan();
+  const traceId = span?.spanContext()?.traceId || '';
+  const spanId = span?.spanContext()?.spanId || '';
 
   // Extract ID field (priority: order_id, req_id, correlation_id)
   let idField = '';
@@ -35,6 +42,15 @@ function log(level, message, metadata = {}) {
     }
     details.push(`${key}=${value}`);
   }
+
+  // Add trace context if available
+  if (traceId) {
+    details.push(`trace_id=${traceId}`);
+  }
+  if (spanId) {
+    details.push(`span_id=${spanId}`);
+  }
+
   const detailsStr = details.join(' ');
 
   // Construct log line
