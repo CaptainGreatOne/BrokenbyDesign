@@ -2,13 +2,19 @@ package queue
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"fulfillment-worker/internal/logger"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // OrderMessage represents a message from the fulfillment queue
@@ -18,9 +24,60 @@ type OrderMessage struct {
 	Quantity      int    `json:"quantity"`
 	CorrelationID string `json:"correlation_id"`
 	Timestamp     string `json:"timestamp,omitempty"`
+	Traceparent   string `json:"traceparent,omitempty"`
 }
 
 const queueName = "fulfillment_queue"
+
+// parseTraceparent parses a W3C traceparent string (e.g., "00-<trace_id>-<span_id>-<flags>")
+// and returns the corresponding SpanContext for creating trace links.
+func parseTraceparent(traceparent string) (trace.SpanContext, bool) {
+	if traceparent == "" {
+		return trace.SpanContext{}, false
+	}
+
+	parts := strings.Split(traceparent, "-")
+	if len(parts) != 4 || parts[0] != "00" {
+		return trace.SpanContext{}, false
+	}
+
+	traceIDHex := parts[1]
+	spanIDHex := parts[2]
+	flagsHex := parts[3]
+
+	if len(traceIDHex) != 32 || len(spanIDHex) != 16 || len(flagsHex) != 2 {
+		return trace.SpanContext{}, false
+	}
+
+	traceIDBytes, err := hex.DecodeString(traceIDHex)
+	if err != nil {
+		return trace.SpanContext{}, false
+	}
+
+	spanIDBytes, err := hex.DecodeString(spanIDHex)
+	if err != nil {
+		return trace.SpanContext{}, false
+	}
+
+	flagsByte, err := hex.DecodeString(flagsHex)
+	if err != nil {
+		return trace.SpanContext{}, false
+	}
+
+	var traceID trace.TraceID
+	var spanID trace.SpanID
+	copy(traceID[:], traceIDBytes)
+	copy(spanID[:], spanIDBytes)
+
+	cfg := trace.SpanContextConfig{
+		TraceID:    traceID,
+		SpanID:     spanID,
+		TraceFlags: trace.TraceFlags(flagsByte[0]),
+		Remote:     true,
+	}
+
+	return trace.NewSpanContext(cfg), true
+}
 
 // NewRedisClient creates a new Redis client with retry logic
 func NewRedisClient(ctx context.Context) (*redis.Client, error) {
@@ -135,17 +192,45 @@ func Consume(ctx context.Context, rdb *redis.Client, handler func(context.Contex
 			"queue":      queueName,
 		})
 
+		// Parse traceparent from queue payload for linked trace
+		var spanOpts []trace.SpanStartOption
+		if parentCtx, ok := parseTraceparent(msg.Traceparent); ok {
+			spanOpts = append(spanOpts, trace.WithLinks(trace.Link{
+				SpanContext: parentCtx,
+			}))
+			logger.Info("Trace link established from queue message", "QueueConsumer", msg.CorrelationID, map[string]interface{}{
+				"linked_trace_id": parentCtx.TraceID().String(),
+				"order_id":        msg.OrderID,
+			})
+		}
+
+		// Start a root span for the message processing with the link
+		tr := otel.Tracer("fulfillment-worker")
+		msgCtx, span := tr.Start(ctx, "process-fulfillment", spanOpts...)
+		span.SetAttributes(
+			attribute.Int("order.id", msg.OrderID),
+			attribute.Int("order.product_id", msg.ProductID),
+			attribute.Int("order.quantity", msg.Quantity),
+			attribute.String("queue.name", queueName),
+		)
+
 		// Process the message with the handler
-		err = handler(ctx, msg)
+		err = handler(msgCtx, msg)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			logger.Error("Handler failed to process message", "QueueConsumer", msg.CorrelationID, err, map[string]interface{}{
 				"order_id":   msg.OrderID,
 				"product_id": msg.ProductID,
 				"quantity":   msg.Quantity,
 			})
+			span.End()
 			// Don't crash on single message failure, continue processing
 			continue
 		}
+
+		span.SetStatus(codes.Ok, "")
+		span.End()
 
 		logger.Info("Message processed successfully", "QueueConsumer", msg.CorrelationID, map[string]interface{}{
 			"order_id":   msg.OrderID,

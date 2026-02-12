@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
 // OrdersProcessed tracks the total number of orders processed by the fulfillment worker
@@ -44,6 +46,20 @@ var ServiceHealthy = promauto.NewGauge(
 		Help: "Service health status (1=healthy, 0=unhealthy)",
 	},
 )
+
+// TraceExemplar returns prometheus exemplar labels with the current trace ID from context.
+// Returns nil if no valid trace context is available.
+func TraceExemplar(ctx context.Context) prometheus.Labels {
+	if ctx == nil {
+		return nil
+	}
+	span := oteltrace.SpanFromContext(ctx)
+	spanCtx := span.SpanContext()
+	if !spanCtx.IsValid() {
+		return nil
+	}
+	return prometheus.Labels{"traceID": spanCtx.TraceID().String()}
+}
 
 // StartMetricsServer starts the HTTP server for Prometheus metrics
 func StartMetricsServer(port int) {

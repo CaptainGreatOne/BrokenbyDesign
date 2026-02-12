@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -80,8 +81,9 @@ func main() {
 	processOrder := func(ctx context.Context, msg queue.OrderMessage) error {
 		startTime := time.Now()
 		orderID := fmt.Sprintf("%d", msg.OrderID)
+		tr := otel.Tracer("fulfillment-worker")
 
-		logger.Info(fmt.Sprintf("Processing order %d", msg.OrderID), "ProcessOrder", orderID, map[string]interface{}{
+		logger.InfoCtx(ctx, fmt.Sprintf("Processing order %d", msg.OrderID), "ProcessOrder", orderID, map[string]interface{}{
 			"order_id":   msg.OrderID,
 			"product_id": msg.ProductID,
 			"quantity":   msg.Quantity,
@@ -90,19 +92,39 @@ func main() {
 		// Simulate realistic processing delays (~8% of the time)
 		if rand.Float64() < 0.08 {
 			delayMs := 500 + rand.Intn(1500)
-			logger.Warn("Processing taking longer than expected", "ProcessOrder", orderID, map[string]interface{}{
+			logger.WarnCtx(ctx, "Processing taking longer than expected", "ProcessOrder", orderID, map[string]interface{}{
 				"duration_ms": delayMs,
 			})
 		}
 
-		// Update order status to "processing"
+		// Update order status to "processing" with semantic span
+		func() {
+			_, updateSpan := tr.Start(ctx, "update-order-status-processing", trace.WithAttributes(
+				attribute.Int("order.id", msg.OrderID),
+				attribute.String("order.status", "processing"),
+			))
+			defer updateSpan.End()
+			err := db.UpdateOrderStatus(ctx, pool, msg.OrderID, "processing")
+			if err != nil {
+				updateSpan.RecordError(err)
+				updateSpan.SetStatus(codes.Error, err.Error())
+			}
+		}()
+
 		err := db.UpdateOrderStatus(ctx, pool, msg.OrderID, "processing")
 		if err != nil {
-			logger.Error("Failed to update order status to processing", "ProcessOrder", orderID, err, map[string]interface{}{
+			logger.ErrorCtx(ctx, "Failed to update order status to processing", "ProcessOrder", orderID, err, map[string]interface{}{
 				"order_id": msg.OrderID,
 			})
-			metrics.ProcessingDuration.WithLabelValues("error").Observe(time.Since(startTime).Seconds())
-			metrics.OrdersProcessed.WithLabelValues("error").Inc()
+			duration := time.Since(startTime)
+			exemplar := metrics.TraceExemplar(ctx)
+			if exemplar != nil {
+				metrics.ProcessingDuration.WithLabelValues("error").(prometheus.ExemplarObserver).ObserveWithExemplar(duration.Seconds(), exemplar)
+				metrics.OrdersProcessed.WithLabelValues("error").(prometheus.ExemplarAdder).AddWithExemplar(1, exemplar)
+			} else {
+				metrics.ProcessingDuration.WithLabelValues("error").Observe(duration.Seconds())
+				metrics.OrdersProcessed.WithLabelValues("error").Inc()
+			}
 			return err
 		}
 
@@ -113,31 +135,57 @@ func main() {
 
 		// Simulate temporary database latency (~3% of the time)
 		if rand.Float64() < 0.03 {
-			logger.Warn("Temporary database latency detected", "ProcessOrder", orderID, nil)
+			logger.WarnCtx(ctx, "Temporary database latency detected", "ProcessOrder", orderID, nil)
 		}
 
-		// Update order status to "fulfilled"
+		// Update order status to "fulfilled" with semantic span
+		func() {
+			_, updateSpan := tr.Start(ctx, "update-order-status-fulfilled", trace.WithAttributes(
+				attribute.Int("order.id", msg.OrderID),
+				attribute.String("order.status", "fulfilled"),
+			))
+			defer updateSpan.End()
+			err := db.UpdateOrderStatus(ctx, pool, msg.OrderID, "fulfilled")
+			if err != nil {
+				updateSpan.RecordError(err)
+				updateSpan.SetStatus(codes.Error, err.Error())
+			}
+		}()
+
 		err = db.UpdateOrderStatus(ctx, pool, msg.OrderID, "fulfilled")
 		if err != nil {
-			logger.Error("Failed to update order status to fulfilled", "ProcessOrder", orderID, err, map[string]interface{}{
+			logger.ErrorCtx(ctx, "Failed to update order status to fulfilled", "ProcessOrder", orderID, err, map[string]interface{}{
 				"order_id": msg.OrderID,
 			})
-			metrics.ProcessingDuration.WithLabelValues("error").Observe(time.Since(startTime).Seconds())
-			metrics.OrdersProcessed.WithLabelValues("error").Inc()
+			duration := time.Since(startTime)
+			exemplar := metrics.TraceExemplar(ctx)
+			if exemplar != nil {
+				metrics.ProcessingDuration.WithLabelValues("error").(prometheus.ExemplarObserver).ObserveWithExemplar(duration.Seconds(), exemplar)
+				metrics.OrdersProcessed.WithLabelValues("error").(prometheus.ExemplarAdder).AddWithExemplar(1, exemplar)
+			} else {
+				metrics.ProcessingDuration.WithLabelValues("error").Observe(duration.Seconds())
+				metrics.OrdersProcessed.WithLabelValues("error").Inc()
+			}
 			return err
 		}
 
 		duration := time.Since(startTime)
-		logger.Info(fmt.Sprintf("Order %d fulfilled", msg.OrderID), "ProcessOrder", orderID, map[string]interface{}{
+		logger.InfoCtx(ctx, fmt.Sprintf("Order %d fulfilled", msg.OrderID), "ProcessOrder", orderID, map[string]interface{}{
 			"order_id":              msg.OrderID,
 			"product_id":            msg.ProductID,
 			"quantity":              msg.Quantity,
 			"processing_duration_ms": duration.Milliseconds(),
 		})
 
-		// Track successful processing metrics
-		metrics.ProcessingDuration.WithLabelValues("success").Observe(duration.Seconds())
-		metrics.OrdersProcessed.WithLabelValues("success").Inc()
+		// Track successful processing metrics with exemplars
+		exemplar := metrics.TraceExemplar(ctx)
+		if exemplar != nil {
+			metrics.ProcessingDuration.WithLabelValues("success").(prometheus.ExemplarObserver).ObserveWithExemplar(duration.Seconds(), exemplar)
+			metrics.OrdersProcessed.WithLabelValues("success").(prometheus.ExemplarAdder).AddWithExemplar(1, exemplar)
+		} else {
+			metrics.ProcessingDuration.WithLabelValues("success").Observe(duration.Seconds())
+			metrics.OrdersProcessed.WithLabelValues("success").Inc()
+		}
 
 		return nil
 	}
