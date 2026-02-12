@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Remove the setup tax so learning happens immediately. Services already exist and misbehave. Tools are pre-wired. You just learn.
-**Current focus:** Phase 4: Alerting
+**Current focus:** Phase 5: Distributed Tracing
 
 ## Current Position
 
-Phase: 4 of 12 (Alerting)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-11 - Completed 04-03-PLAN.md (Alerting Infrastructure)
+Phase: 5 of 12 (Distributed Tracing)
+Plan: 1 of 5 in current phase
+Status: In progress
+Last activity: 2026-02-12 - Completed 05-01-PLAN.md (Deploy Trace Backend)
 
-Progress: [█████░░░░░] 63% (17 plans completed)
+Progress: [█████░░░░░] 67% (18 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
-- Average duration: ~3.1 minutes
-- Total execution time: ~0.9 hours
+- Total plans completed: 18
+- Average duration: ~3.0 minutes
+- Total execution time: ~0.96 hours
 
 **By Phase:**
 
@@ -31,10 +31,11 @@ Progress: [█████░░░░░] 63% (17 plans completed)
 | 02-metrics-dashboards | 4 | ~10 min | ~2.5 min |
 | 03-centralized-logging | 4 | ~10.8 min | ~2.7 min |
 | 04-alerting | 3 | ~18.5 min | ~6.2 min |
+| 05-distributed-tracing | 1 | ~2 min | ~2 min |
 
 **Recent Trend:**
-- Last 8 plans: 03-01 (5 min), 03-02 (2.3 min), 03-03 (1.5 min), 03-04 (2 min), 04-01 (4.7 min), 04-02 (3 min), 04-03 (10.8 min)
-- Trend: Phase 4 complete, 04-03 took longer due to healthcheck debugging but all issues resolved
+- Last 8 plans: 03-02 (2.3 min), 03-03 (1.5 min), 03-04 (2 min), 04-01 (4.7 min), 04-02 (3 min), 04-03 (10.8 min), 05-01 (2 min)
+- Trend: Phase 5 started, 05-01 completed quickly (simple config + Docker Compose changes)
 
 *Updated after each plan completion*
 
@@ -91,6 +92,11 @@ Recent decisions affecting current work:
 - Alert grouping by alertname and service: Deduplicates multiple instances of same alert from same service
 - Python urllib healthchecks: Use Python's built-in urllib for healthchecks in python:slim containers (wget not available)
 - Loki healthcheck disabled: Distroless image has no shell utilities, use service_started dependency condition
+- OTLP exporter over deprecated Jaeger exporter: Jaeger natively supports OTLP receiver, OTel Collector exports via OTLP protocol
+- Tail sampling before batch in Collector: Sampling decisions made on complete traces before batching for efficiency
+- 100% probabilistic sampling in dev: All traces sampled for learning visibility, production would use 10% or lower
+- Badger storage with 72h retention: Matches Loki retention for consistency across observability tools
+- Tracing profile in Docker Compose: Optional trace infrastructure (~1GB) activated with --profile tracing or --profile full
 
 ### Pending Todos
 
@@ -102,7 +108,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-11T13:11:08Z
-Stopped at: Completed 04-03-PLAN.md (Alerting Infrastructure) - Phase 4 complete
+Last session: 2026-02-12T04:19:19Z
+Stopped at: Completed 05-01-PLAN.md (Deploy Trace Backend)
 Resume file: None
-Next: Phase 5 planning (Distributed Tracing)
+Next: Execute 05-02-PLAN.md (Instrument Services)
