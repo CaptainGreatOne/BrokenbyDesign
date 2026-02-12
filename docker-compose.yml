@@ -36,6 +36,8 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 3s
@@ -563,6 +565,7 @@ volumes:
   loki-data:
   alertmanager-data:
   jaeger-badger:
+  redis_data:
 
 # Profiles:
 #   (default)  - Core services only (3 microservices + postgres + redis + nginx + traffic-gen)
