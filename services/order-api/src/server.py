@@ -8,6 +8,11 @@ import time
 import random
 from concurrent import futures
 
+# Initialize OpenTelemetry BEFORE importing grpc, db, redis modules
+# This ensures auto-instrumentation hooks are registered first
+import tracing
+tracing.init_tracing()
+
 import grpc
 
 # Import generated protobuf code
