@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 5 of 12 (Distributed Tracing)
-Plan: 3 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-12 - Completed 05-03-PLAN.md (Instrument Order-API)
+Last activity: 2026-02-12 - Completed 05-04-PLAN.md (Instrument Fulfillment-Worker)
 
-Progress: [██████░░░░] 74% (20 plans completed)
+Progress: [██████░░░░] 78% (21 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
-- Average duration: ~3.1 minutes
-- Total execution time: ~1.05 hours
+- Total plans completed: 21
+- Average duration: ~3.6 minutes
+- Total execution time: ~1.26 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [██████░░░░] 74% (20 plans completed)
 | 02-metrics-dashboards | 4 | ~10 min | ~2.5 min |
 | 03-centralized-logging | 4 | ~10.8 min | ~2.7 min |
 | 04-alerting | 3 | ~18.5 min | ~6.2 min |
-| 05-distributed-tracing | 3 | ~12 min | ~4 min |
+| 05-distributed-tracing | 4 | ~22 min | ~5.5 min |
 
 **Recent Trend:**
-- Last 8 plans: 03-04 (2 min), 04-01 (4.7 min), 04-02 (3 min), 04-03 (10.8 min), 05-01 (2 min), 05-02 (5 min), 05-03 (5 min)
-- Trend: Phase 5 progressing, continuation pattern working well (verifying pre-committed work + completing remaining tasks)
+- Last 8 plans: 04-01 (4.7 min), 04-02 (3 min), 04-03 (10.8 min), 05-01 (2 min), 05-02 (5 min), 05-03 (5 min), 05-04 (10 min)
+- Trend: Phase 5 instrumentation tasks taking longer (avg ~5.5 min) due to polyglot complexity, manual OTel SDK setup in Go, and bug fixes during compilation verification
 
 *Updated after each plan completion*
 
@@ -103,6 +103,8 @@ Recent decisions affecting current work:
 - Trace context in logs: Extract trace_id/span_id from active span and inject into structured logs for trace-log correlation in Loki/Jaeger
 - Exemplars on metrics: Attach trace IDs to metric observations enabling jump from metrics spike to specific traces in Grafana
 - Disable fs instrumentation: Reduce trace noise by disabling file system operation spans in local development (Node.js)
+- attribute.String for OTel resource creation: Simpler than semconv package, avoids complex versioned path imports (go.opentelemetry.io/otel/semconv/vX.Y.Z) that caused go mod parse errors in Go services
+- W3C traceparent parsing with trace links for async queues: Queue consumer creates NEW trace with link to originating trace (not child span), correct pattern for async boundaries where context propagation doesn't apply
 
 ### Pending Todos
 
@@ -114,7 +116,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-12T13:49:42Z
-Stopped at: Completed 05-03-PLAN.md (Instrument Order-API)
+Last session: 2026-02-12T13:49:06Z
+Stopped at: Completed 05-04-PLAN.md (Instrument Fulfillment-Worker)
 Resume file: None
-Next: Execute 05-04-PLAN.md (Instrument Fulfillment-Worker) or 05-05-PLAN.md (Verify Trace Correlation)
+Next: Execute 05-05-PLAN.md (Verify Trace Correlation)
