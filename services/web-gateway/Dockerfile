@@ -20,5 +20,5 @@ COPY services/web-gateway/src/ /app/src/
 # Expose HTTP port
 EXPOSE 3000
 
-# Start the server
-CMD ["node", "src/server.js"]
+# Start the server with OpenTelemetry auto-instrumentation
+CMD ["node", "--require", "./src/tracing.js", "src/server.js"]
