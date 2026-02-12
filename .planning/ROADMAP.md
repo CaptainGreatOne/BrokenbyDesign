@@ -137,10 +137,14 @@ Plans:
   4. Chaos effects are immediately visible in Prometheus metrics, Loki logs, and Jaeger traces
   5. Services return to normal behavior after chaos reset endpoint is called
   6. Each chaos scenario has documented before/after comparison showing observable differences
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] TBD during planning
+- [ ] 06-01-PLAN.md -- Web-gateway chaos endpoints and middleware (Wave 1)
+- [ ] 06-02-PLAN.md -- Order-api chaos endpoints and gRPC interceptor (Wave 1)
+- [ ] 06-03-PLAN.md -- Fulfillment-worker chaos endpoints and processing checks (Wave 1)
+- [ ] 06-04-PLAN.md -- Chaos-controller service with REST API and web UI (Wave 2)
+- [ ] 06-05-PLAN.md -- Docker Compose integration and shell scripts (Wave 2)
 
 ### Phase 7: Event Streaming
 **Goal**: Learner can observe asynchronous message flow through Kafka topics with producer/consumer monitoring
