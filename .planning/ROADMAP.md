@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Metrics & Dashboards** - Prometheus + Grafana with working dashboards showing service health
 - [x] **Phase 3: Centralized Logging** - Loki + Promtail for aggregated log search across all services
 - [x] **Phase 4: Alerting** - Alertmanager with rules that detect and route common failure patterns
-- [ ] **Phase 5: Distributed Tracing** - Jaeger + OpenTelemetry for cross-service request visualization
+- [x] **Phase 5: Distributed Tracing** - Jaeger + OpenTelemetry for cross-service request visualization
 - [ ] **Phase 6: Chaos Engineering** - Controllable failure injection showing observable impact on metrics/logs/traces
 - [ ] **Phase 7: Event Streaming** - Kafka with producers, consumers, and observable message flow
 - [ ] **Phase 8: CI/CD Pipelines** - Gitea + Drone for build/test/deploy automation
@@ -120,11 +120,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- Jaeger + OTel Collector infrastructure (Wave 1)
-- [ ] 05-02-PLAN.md -- Web-gateway Node.js instrumentation (Wave 2)
-- [ ] 05-03-PLAN.md -- Order-api Python instrumentation + W3C traceparent in queue (Wave 2)
-- [ ] 05-04-PLAN.md -- Fulfillment-worker Go instrumentation + linked traces (Wave 2)
-- [ ] 05-05-PLAN.md -- Grafana Jaeger datasource + cross-linking (Wave 3)
+- [x] 05-01-PLAN.md -- Jaeger + OTel Collector infrastructure (Wave 1)
+- [x] 05-02-PLAN.md -- Web-gateway Node.js instrumentation (Wave 2)
+- [x] 05-03-PLAN.md -- Order-api Python instrumentation + W3C traceparent in queue (Wave 2)
+- [x] 05-04-PLAN.md -- Fulfillment-worker Go instrumentation + linked traces (Wave 2)
+- [x] 05-05-PLAN.md -- Grafana Jaeger datasource + cross-linking (Wave 3)
 
 ### Phase 6: Chaos Engineering
 **Goal**: Learner can inject failures and observe their impact across metrics, logs, and traces
@@ -243,9 +243,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 |-------|----------------|--------|-----------|
 | 1. Foundation Services | 6/6 | Complete | 2026-02-06 |
 | 2. Metrics & Dashboards | 4/4 | Complete | 2026-02-06 |
-| 3. Centralized Logging | 0/TBD | Not started | - |
-| 4. Alerting | 0/TBD | Not started | - |
-| 5. Distributed Tracing | 0/TBD | Not started | - |
+| 3. Centralized Logging | 4/4 | Complete | 2026-02-08 |
+| 4. Alerting | 3/3 | Complete | 2026-02-10 |
+| 5. Distributed Tracing | 5/5 | Complete | 2026-02-12 |
 | 6. Chaos Engineering | 0/TBD | Not started | - |
 | 7. Event Streaming | 0/TBD | Not started | - |
 | 8. CI/CD Pipelines | 0/TBD | Not started | - |

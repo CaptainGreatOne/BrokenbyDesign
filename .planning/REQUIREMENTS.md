@@ -46,12 +46,12 @@
 
 ### Distributed Tracing
 
-- [ ] **TRAC-01**: Jaeger receives and stores distributed traces
-- [ ] **TRAC-02**: OpenTelemetry Collector receives traces from services and forwards to Jaeger
-- [ ] **TRAC-03**: All application services are instrumented with OpenTelemetry SDKs
-- [ ] **TRAC-04**: Traces show the full request path across multiple services
-- [ ] **TRAC-05**: Learner can view trace timelines and service dependency graphs in Jaeger UI
-- [ ] **TRAC-06**: Grafana links to Jaeger traces from dashboard panels
+- [x] **TRAC-01**: Jaeger receives and stores distributed traces
+- [x] **TRAC-02**: OpenTelemetry Collector receives traces from services and forwards to Jaeger
+- [x] **TRAC-03**: All application services are instrumented with OpenTelemetry SDKs
+- [x] **TRAC-04**: Traces show the full request path across multiple services
+- [x] **TRAC-05**: Learner can view trace timelines and service dependency graphs in Jaeger UI
+- [x] **TRAC-06**: Grafana links to Jaeger traces from dashboard panels
 
 ### Chaos Engineering
 
@@ -163,12 +163,12 @@
 | ALRT-03 | Phase 4 | Complete |
 | ALRT-04 | Phase 4 | Complete |
 | ALRT-05 | Phase 4 | Complete |
-| TRAC-01 | Phase 5 | Pending |
-| TRAC-02 | Phase 5 | Pending |
-| TRAC-03 | Phase 5 | Pending |
-| TRAC-04 | Phase 5 | Pending |
-| TRAC-05 | Phase 5 | Pending |
-| TRAC-06 | Phase 5 | Pending |
+| TRAC-01 | Phase 5 | Complete |
+| TRAC-02 | Phase 5 | Complete |
+| TRAC-03 | Phase 5 | Complete |
+| TRAC-04 | Phase 5 | Complete |
+| TRAC-05 | Phase 5 | Complete |
+| TRAC-06 | Phase 5 | Complete |
 | CAOS-01 | Phase 6 | Pending |
 | CAOS-02 | Phase 6 | Pending |
 | CAOS-03 | Phase 6 | Pending |
