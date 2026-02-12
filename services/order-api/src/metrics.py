@@ -1,6 +1,7 @@
 """Prometheus metrics configuration for order-api service."""
 
 from prometheus_client import Counter, Histogram, Gauge, start_http_server
+from opentelemetry import trace
 
 # gRPC request counter with labels: method, status
 grpc_requests_total = Counter(
@@ -29,6 +30,15 @@ service_healthy = Gauge(
     'service_healthy',
     'Service health status (1=healthy, 0=unhealthy)'
 )
+
+
+def get_trace_exemplar():
+    """Get exemplar dict with current trace ID, or empty dict if no trace context."""
+    span = trace.get_current_span()
+    span_ctx = span.get_span_context() if span else None
+    if span_ctx and span_ctx.is_valid:
+        return {"traceID": f"{span_ctx.trace_id:032x}"}
+    return {}
 
 
 def start_metrics_server(port=8000):

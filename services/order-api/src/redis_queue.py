@@ -6,6 +6,7 @@ import time
 import random
 from typing import Optional
 import redis
+from opentelemetry import trace
 from logger import json_log
 
 
@@ -79,41 +80,58 @@ def enqueue_fulfillment(order_id: int, product_id: int, quantity: int, correlati
         quantity: Quantity ordered
         correlation_id: Correlation ID for request tracing
     """
-    client = _get_redis_client()
+    tracer = trace.get_tracer("order-api")
 
-    # Simulate occasional Redis pipeline latency (~3% chance)
-    if random.random() < 0.03:
-        latency_ms = random.randint(50, 200)
-        json_log("WARN", "Redis pipeline latency elevated",
-                handler="RedisQueue",
-                order_id=order_id,
-                latency_ms=latency_ms,
-                correlation_id=correlation_id)
+    with tracer.start_as_current_span("enqueue-fulfillment", attributes={
+        "order.id": order_id,
+        "queue.name": "fulfillment_queue",
+    }) as span:
+        client = _get_redis_client()
 
-    message = {
-        "order_id": order_id,
-        "product_id": product_id,
-        "quantity": quantity,
-        "correlation_id": correlation_id
-    }
+        # Simulate occasional Redis pipeline latency (~3% chance)
+        if random.random() < 0.03:
+            latency_ms = random.randint(50, 200)
+            json_log("WARN", "Redis pipeline latency elevated",
+                    handler="RedisQueue",
+                    order_id=order_id,
+                    latency_ms=latency_ms,
+                    correlation_id=correlation_id)
 
-    try:
-        client.lpush("fulfillment_queue", json.dumps(message))
+        # Serialize W3C traceparent into queue payload for linked trace propagation
+        span_ctx = span.get_span_context() if span else None
+        traceparent = ""
+        if span_ctx and span_ctx.is_valid:
+            traceparent = f"00-{span_ctx.trace_id:032x}-{span_ctx.span_id:016x}-{span_ctx.trace_flags:02x}"
 
-        json_log("INFO", "Fulfillment message enqueued",
-                handler="RedisQueue",
-                order_id=order_id,
-                product_id=product_id,
-                quantity=quantity,
-                correlation_id=correlation_id)
+        message = {
+            "order_id": order_id,
+            "product_id": product_id,
+            "quantity": quantity,
+            "correlation_id": correlation_id,
+            "traceparent": traceparent,
+        }
 
-    except Exception as e:
-        json_log("ERROR", "Failed to enqueue fulfillment message",
-                handler="RedisQueue",
-                order_id=order_id,
-                error=str(e),
-                correlation_id=correlation_id)
-        raise
+        try:
+            client.lpush("fulfillment_queue", json.dumps(message))
+
+            json_log("INFO", "Fulfillment message enqueued",
+                    handler="RedisQueue",
+                    order_id=order_id,
+                    product_id=product_id,
+                    quantity=quantity,
+                    correlation_id=correlation_id)
+
+            span.set_status(trace.Status(trace.StatusCode.OK))
+
+        except Exception as e:
+            json_log("ERROR", "Failed to enqueue fulfillment message",
+                    handler="RedisQueue",
+                    order_id=order_id,
+                    error=str(e),
+                    correlation_id=correlation_id)
+            span.record_exception(e)
+            span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
+            raise
 
 
 def get_cached_product(product_id: int) -> Optional[dict]:

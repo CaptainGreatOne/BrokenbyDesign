@@ -2,6 +2,7 @@
 
 import sys
 from datetime import datetime, timezone
+from opentelemetry import trace
 
 
 def log(level: str, message: str, **kwargs):
@@ -33,6 +34,20 @@ def log(level: str, message: str, **kwargs):
     elif "correlation_id" in kwargs:
         id_field = f"corr={kwargs.pop('correlation_id')}"
 
+    # Extract trace context if available
+    span = trace.get_current_span()
+    span_ctx = span.get_span_context() if span else None
+    trace_id = ""
+    span_id = ""
+    if span_ctx and span_ctx.is_valid:
+        trace_id = f"{span_ctx.trace_id:032x}"
+        span_id = f"{span_ctx.span_id:016x}"
+
+    # Build trace fields
+    trace_fields = ""
+    if trace_id:
+        trace_fields = f"trace_id={trace_id} span_id={span_id}"
+
     # Format level (uppercase, padded to 5 chars)
     level_str = level.upper().ljust(5)
 
@@ -40,7 +55,7 @@ def log(level: str, message: str, **kwargs):
     details = " ".join(f"{k}={v}" for k, v in kwargs.items())
 
     # Build log line
-    parts = [timestamp, level_str, "order-api", handler, id_field, details, message]
+    parts = [timestamp, level_str, "order-api", handler, id_field, trace_fields, details, message]
     # Filter out empty parts
     log_line = " ".join(part for part in parts if part)
 
