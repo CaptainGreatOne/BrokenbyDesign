@@ -117,10 +117,14 @@ Plans:
   4. Traces show the full request path across multiple services with parent-child relationships
   5. Learner can view trace timelines (waterfall diagrams) and service dependency graphs in Jaeger UI
   6. Grafana dashboards link to Jaeger traces for correlated exploration
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] TBD during planning
+- [ ] 05-01-PLAN.md -- Jaeger + OTel Collector infrastructure (Wave 1)
+- [ ] 05-02-PLAN.md -- Web-gateway Node.js instrumentation (Wave 2)
+- [ ] 05-03-PLAN.md -- Order-api Python instrumentation + W3C traceparent in queue (Wave 2)
+- [ ] 05-04-PLAN.md -- Fulfillment-worker Go instrumentation + linked traces (Wave 2)
+- [ ] 05-05-PLAN.md -- Grafana Jaeger datasource + cross-linking (Wave 3)
 
 ### Phase 6: Chaos Engineering
 **Goal**: Learner can inject failures and observe their impact across metrics, logs, and traces
