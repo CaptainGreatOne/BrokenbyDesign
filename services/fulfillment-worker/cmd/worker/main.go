@@ -7,14 +7,33 @@ import (
 	"fulfillment-worker/internal/logger"
 	"fulfillment-worker/internal/metrics"
 	"fulfillment-worker/internal/queue"
+	"fulfillment-worker/internal/tracing"
 	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func main() {
+	// Initialize OpenTelemetry tracing FIRST
+	shutdownTracer, err := tracing.InitTracer("fulfillment-worker")
+	if err != nil {
+		logger.Error("Failed to initialize tracing", "Main", "", err, nil)
+		// Non-fatal: continue without tracing
+	} else {
+		defer func() {
+			if err := shutdownTracer(context.Background()); err != nil {
+				logger.Error("Failed to shut down tracer", "Main", "", err, nil)
+			}
+		}()
+	}
+
 	// Create context with cancellation
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
