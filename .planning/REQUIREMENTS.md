@@ -55,12 +55,12 @@
 
 ### Chaos Engineering
 
-- [ ] **CAOS-01**: Each application service exposes chaos control endpoints (slow, error, crash, reset)
-- [ ] **CAOS-02**: Chaos scenarios include: slow database queries, service crashes, memory pressure, network latency
-- [ ] **CAOS-03**: Chaos can be triggered via shell scripts or HTTP calls
-- [ ] **CAOS-04**: Chaos effects are visible in metrics, logs, and traces
-- [ ] **CAOS-05**: Services recover to normal after chaos is disabled via reset endpoint
-- [ ] **CAOS-06**: Each chaos scenario has a before/after comparison reference
+- [x] **CAOS-01**: Each application service exposes chaos control endpoints (slow, error, crash, reset)
+- [x] **CAOS-02**: Chaos scenarios include: slow database queries, service crashes, memory pressure, network latency
+- [x] **CAOS-03**: Chaos can be triggered via shell scripts or HTTP calls
+- [x] **CAOS-04**: Chaos effects are visible in metrics, logs, and traces
+- [x] **CAOS-05**: Services recover to normal after chaos is disabled via reset endpoint
+- [ ] **CAOS-06**: Each chaos scenario has a before/after comparison reference (deferred to Phase 10)
 
 ### Event Streaming
 
@@ -169,12 +169,12 @@
 | TRAC-04 | Phase 5 | Complete |
 | TRAC-05 | Phase 5 | Complete |
 | TRAC-06 | Phase 5 | Complete |
-| CAOS-01 | Phase 6 | Pending |
-| CAOS-02 | Phase 6 | Pending |
-| CAOS-03 | Phase 6 | Pending |
-| CAOS-04 | Phase 6 | Pending |
-| CAOS-05 | Phase 6 | Pending |
-| CAOS-06 | Phase 6 | Pending |
+| CAOS-01 | Phase 6 | Complete |
+| CAOS-02 | Phase 6 | Complete |
+| CAOS-03 | Phase 6 | Complete |
+| CAOS-04 | Phase 6 | Complete |
+| CAOS-05 | Phase 6 | Complete |
+| CAOS-06 | Phase 10 | Deferred |
 | STRM-01 | Phase 7 | Pending |
 | STRM-02 | Phase 7 | Pending |
 | STRM-03 | Phase 7 | Pending |

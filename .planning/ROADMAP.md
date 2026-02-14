@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Centralized Logging** - Loki + Promtail for aggregated log search across all services
 - [x] **Phase 4: Alerting** - Alertmanager with rules that detect and route common failure patterns
 - [x] **Phase 5: Distributed Tracing** - Jaeger + OpenTelemetry for cross-service request visualization
-- [ ] **Phase 6: Chaos Engineering** - Controllable failure injection showing observable impact on metrics/logs/traces
+- [x] **Phase 6: Chaos Engineering** - Controllable failure injection showing observable impact on metrics/logs/traces
 - [ ] **Phase 7: Event Streaming** - Kafka with producers, consumers, and observable message flow
 - [ ] **Phase 8: CI/CD Pipelines** - Gitea + Drone for build/test/deploy automation
 - [ ] **Phase 9: Data Pipelines** - ETL workflow examples with observable execution
@@ -136,15 +136,15 @@ Plans:
   3. Chaos can be triggered via shell scripts or direct HTTP calls
   4. Chaos effects are immediately visible in Prometheus metrics, Loki logs, and Jaeger traces
   5. Services return to normal behavior after chaos reset endpoint is called
-  6. Each chaos scenario has documented before/after comparison showing observable differences
+  6. ~~Each chaos scenario has documented before/after comparison showing observable differences~~ (Deferred to Phase 10: Curriculum — before/after docs are learning content, not infrastructure)
 **Plans**: 5 plans
 
 Plans:
-- [ ] 06-01-PLAN.md -- Web-gateway chaos endpoints and middleware (Wave 1)
-- [ ] 06-02-PLAN.md -- Order-api chaos endpoints and gRPC interceptor (Wave 1)
-- [ ] 06-03-PLAN.md -- Fulfillment-worker chaos endpoints and processing checks (Wave 1)
-- [ ] 06-04-PLAN.md -- Chaos-controller service with REST API and web UI (Wave 2)
-- [ ] 06-05-PLAN.md -- Docker Compose integration and shell scripts (Wave 2)
+- [x] 06-01-PLAN.md -- Web-gateway chaos endpoints and middleware (Wave 1)
+- [x] 06-02-PLAN.md -- Order-api chaos endpoints and gRPC interceptor (Wave 1)
+- [x] 06-03-PLAN.md -- Fulfillment-worker chaos endpoints and processing checks (Wave 1)
+- [x] 06-04-PLAN.md -- Chaos-controller service with REST API and web UI (Wave 2)
+- [x] 06-05-PLAN.md -- Docker Compose integration and shell scripts (Wave 2)
 
 ### Phase 7: Event Streaming
 **Goal**: Learner can observe asynchronous message flow through Kafka topics with producer/consumer monitoring
@@ -205,6 +205,7 @@ Plans:
   8. Each lesson includes hands-on exercises the learner completes in the sandbox
   9. Lessons progress from guided (step-by-step) to independent (challenge-based)
   10. Solutions are provided for all exercises
+  11. Chaos engineering before/after comparison guides document observable differences per scenario (deferred from Phase 6)
 **Plans**: TBD
 
 Plans:
@@ -250,7 +251,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 3. Centralized Logging | 4/4 | Complete | 2026-02-08 |
 | 4. Alerting | 3/3 | Complete | 2026-02-10 |
 | 5. Distributed Tracing | 5/5 | Complete | 2026-02-12 |
-| 6. Chaos Engineering | 0/TBD | Not started | - |
+| 6. Chaos Engineering | 5/5 | Complete | 2026-02-14 |
 | 7. Event Streaming | 0/TBD | Not started | - |
 | 8. CI/CD Pipelines | 0/TBD | Not started | - |
 | 9. Data Pipelines | 0/TBD | Not started | - |
