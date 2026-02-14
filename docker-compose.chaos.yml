@@ -1,0 +1,19 @@
+# docker-compose.chaos.yml
+# Override file for chaos engineering — disables auto-restart on application services
+# so that crash scenarios leave services down until explicitly reset.
+#
+# Usage: docker compose -f docker-compose.yml -f docker-compose.chaos.yml --profile chaos up -d
+#
+# NOTE: The chaos-controller itself keeps restart: unless-stopped in the main compose file
+# because it is the control plane, not a chaos target. Only the three application services
+# have restart disabled here so that crash scenarios (process.exit/os._exit/os.Exit) leave
+# the service down until the user explicitly brings it back:
+#   docker compose -f docker-compose.yml -f docker-compose.chaos.yml --profile chaos up -d <service>
+
+services:
+  web-gateway:
+    restart: "no"
+  order-api:
+    restart: "no"
+  fulfillment-worker:
+    restart: "no"

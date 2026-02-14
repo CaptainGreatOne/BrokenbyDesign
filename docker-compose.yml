@@ -1,6 +1,7 @@
 # Resource budget: ~7.6GB total (core services ~5GB + observability ~2.6GB), ~4.4GB reserved for profile services
 # Alerting services: alertmanager (256M), webhook-receiver (128M), mock-slack-ui (128M) = ~512M
 # Tracing services: jaeger (512M), otel-collector (512M) = ~1GB for tracing profile
+# Chaos services: chaos-controller (128M) = ~128M for chaos profile
 
 services:
   # Infrastructure Services
@@ -558,6 +559,41 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Chaos Engineering Services
+  chaos-controller:
+    build: ./chaos-controller
+    container_name: chaos-controller
+    restart: unless-stopped
+    environment:
+      - PORT=9095
+      - SERVICE_NAME=chaos-controller
+    ports:
+      - "9095:9095"
+    depends_on:
+      web-gateway:
+        condition: service_healthy
+      order-api:
+        condition: service_healthy
+      fulfillment-worker:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9095/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    profiles: [chaos, full]
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   postgres-data:
   prometheus-data:
@@ -570,6 +606,7 @@ volumes:
 # Profiles:
 #   (default)  - Core services only (3 microservices + postgres + redis + nginx + traffic-gen)
 #   tracing    - Core + distributed tracing (Jaeger, OTel Collector) [Phase 5]
+#   chaos      - Core + chaos engineering controller [Phase 6]
 #   kafka      - Core + event streaming (Kafka, Kafka UI) [Phase 7]
 #   cicd       - Core + CI/CD pipeline (Gitea, Drone) [Phase 8]
 #   full       - All services
