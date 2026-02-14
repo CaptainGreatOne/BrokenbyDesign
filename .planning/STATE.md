@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 6 of 12 (Chaos Engineering)
-Plan: 2 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-14 - Completed 06-02-PLAN.md (Order-API Chaos gRPC Interceptor and Flask HTTP Endpoints)
+Last activity: 2026-02-14 - Completed 06-03-PLAN.md (Fulfillment-Worker Chaos Package)
 
-Progress: [██████░░░░] ~43% overall (23 plans completed)
+Progress: [██████░░░░] ~44% overall (24 plans completed)
 
 ## Performance Metrics
 
@@ -118,6 +118,9 @@ Recent decisions affecting current work:
 - ChaosInterceptor uses handler._replace(unary_unary=...) to wrap gRPC handlers without breaking namedtuple type
 - os._exit(1) for crash scenario bypasses Python cleanup for realistic process termination
 - Auto-disable timer: threading.Timer daemon=True stored in chaos_state for cancellation on re-enable
+- Go chaos endpoints share port 2112 with /metrics and /health (no separate port)
+- Go chaos crash: os.Exit(1) with 100ms sleep for log flush
+- Go auto-disable timer: time.AfterFunc with timers map protected by existing RWMutex
 
 ### Pending Todos
 
@@ -129,7 +132,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-14
-Stopped at: Completed 06-02-PLAN.md (Order-API Chaos gRPC Interceptor and Flask HTTP Endpoints)
+Last session: 2026-02-14T14:29:33Z
+Stopped at: Completed 06-03-PLAN.md (Fulfillment-Worker Chaos Package)
 Resume file: None
-Next: Execute 06-03 (chaos endpoints for fulfillment-worker Go service)
+Next: Execute 06-04 (chaos exercises)
