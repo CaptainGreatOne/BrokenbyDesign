@@ -5,8 +5,9 @@
 
 const client = require('prom-client');
 
-// Create a Registry to register metrics
+// Create a Registry to register metrics (OpenMetrics required for exemplar support)
 const register = new client.Registry();
+register.setContentType(client.Registry.OPENMETRICS_CONTENT_TYPE);
 
 // Collect default Node.js metrics (GC, event loop lag, memory heap, etc.)
 client.collectDefaultMetrics({ register });
