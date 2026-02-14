@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chaos Controller</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #16213e;
+      border-bottom: 1px solid #0f3460;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      color: #e94560;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    header .badge {
+      font-size: 0.75rem;
+      color: #888;
+      margin-left: 10px;
+    }
+
+    main {
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      color: #a0a0c0;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #0f3460;
+      padding-bottom: 6px;
+    }
+
+    /* Status Grid */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .service-card {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 6px;
+      padding: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .service-card.status-ok { border-left: 4px solid #4caf50; }
+    .service-card.status-mild { border-left: 4px solid #ff9800; }
+    .service-card.status-severe { border-left: 4px solid #f44336; }
+    .service-card.status-unknown { border-left: 4px solid #666; }
+
+    .service-card .service-name {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: #c0c0e0;
+      margin-bottom: 8px;
+    }
+
+    .service-card .chaos-state {
+      font-size: 0.8rem;
+      color: #888;
+      line-height: 1.6;
+    }
+
+    .scenario-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      margin: 2px;
+    }
+    .scenario-tag.mild { background: #7a4400; color: #ffb74d; }
+    .scenario-tag.severe { background: #5a0000; color: #ef9a9a; }
+    .scenario-tag.none { color: #4caf50; }
+
+    .refresh-indicator {
+      font-size: 0.75rem;
+      color: #555;
+      text-align: right;
+      margin-bottom: 6px;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.75rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    select, input[type="number"] {
+      background: #0f3460;
+      color: #e0e0e0;
+      border: 1px solid #1a5090;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      min-width: 160px;
+      outline: none;
+    }
+
+    select:focus, input[type="number"]:focus {
+      border-color: #e94560;
+    }
+
+    .severity-group {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding-top: 6px;
+    }
+
+    .severity-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.9rem;
+      color: #c0c0e0;
+    }
+
+    input[type="radio"] { accent-color: #e94560; }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-enable { background: #e94560; color: white; }
+    .btn-disable { background: #0f3460; color: #a0b0d0; border: 1px solid #1a5090; }
+    .btn-reset { background: #333; color: #e0e0e0; border: 1px solid #555; }
+
+    /* Result box */
+    .result-box {
+      margin-top: 16px;
+      background: #0d1b2a;
+      border: 1px solid #0f3460;
+      border-radius: 4px;
+      padding: 12px;
+      font-size: 0.8rem;
+      color: #8fbcbb;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 180px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .result-box.visible { display: block; }
+    .result-box.result-error { border-color: #e94560; color: #ef9a9a; }
+    .result-box.result-ok { border-color: #4caf50; color: #a5d6a7; }
+
+    /* Severity presets */
+    .presets {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .preset-btns {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .btn-preset {
+      padding: 7px 16px;
+      background: #1a1a2e;
+      border: 1px solid #0f3460;
+      color: #c0c0e0;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .btn-preset.mild-preset { border-color: #ff9800; color: #ffb74d; }
+    .btn-preset.severe-preset { border-color: #e94560; color: #ef9a9a; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Chaos Controller <span class="badge">port 9095</span></h1>
+    </div>
+    <button class="btn-reset" onclick="resetAll()">Reset All Chaos</button>
+  </header>
+
+  <main>
+    <section>
+      <div class="refresh-indicator" id="lastRefresh">Status: loading...</div>
+      <h2>Service Status</h2>
+      <div class="status-grid" id="statusGrid">
+        <div class="service-card status-unknown">
+          <div class="service-name">web-gateway</div>
+          <div class="chaos-state">Loading...</div>
+        </div>
+        <div class="service-card status-unknown">
+          <div class="service-name">order-api</div>
+          <div class="chaos-state">Loading...</div>
+        </div>
+        <div class="service-card status-unknown">
+          <div class="service-name">fulfillment-worker</div>
+          <div class="chaos-state">Loading...</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="control-panel">
+      <h2>Inject Chaos</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="svcSelect">Service</label>
+          <select id="svcSelect">
+            <option value="all">all services</option>
+            <option value="web-gateway">web-gateway</option>
+            <option value="order-api">order-api</option>
+            <option value="fulfillment-worker">fulfillment-worker</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="scenarioSelect">Scenario</label>
+          <select id="scenarioSelect">
+            <option value="latency">latency</option>
+            <option value="errors">errors</option>
+            <option value="crash">crash</option>
+            <option value="memory">memory</option>
+            <option value="disk">disk</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Severity</label>
+          <div class="severity-group">
+            <label><input type="radio" name="severity" value="mild" checked /> mild</label>
+            <label><input type="radio" name="severity" value="severe" /> severe</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="durationInput">Duration (seconds, optional)</label>
+          <input type="number" id="durationInput" placeholder="e.g. 30" min="1" style="min-width:120px;" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-enable" onclick="enableChaos()">Enable</button>
+        <button class="btn-disable" onclick="disableChaos()">Disable</button>
+      </div>
+      <div class="result-box" id="resultBox"></div>
+    </section>
+
+    <section class="presets">
+      <h2>Quick Presets</h2>
+      <div class="preset-btns">
+        <button class="btn-preset mild-preset" onclick="applyPreset('mild')">Mild Disruption (all, latency+errors, mild)</button>
+        <button class="btn-preset severe-preset" onclick="applyPreset('severe')">Severe Disruption (all, latency+errors, severe)</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const SERVICES = ['web-gateway', 'order-api', 'fulfillment-worker'];
+
+    function getSeverity() {
+      return document.querySelector('input[name="severity"]:checked').value;
+    }
+
+    function showResult(data, isError = false) {
+      const box = document.getElementById('resultBox');
+      box.textContent = JSON.stringify(data, null, 2);
+      box.className = 'result-box visible ' + (isError ? 'result-error' : 'result-ok');
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/chaos/status?service=all');
+        const data = await res.json();
+        renderStatus(data.status || {});
+        document.getElementById('lastRefresh').textContent =
+          'Last refresh: ' + new Date().toLocaleTimeString();
+      } catch (err) {
+        document.getElementById('lastRefresh').textContent = 'Status fetch failed: ' + err.message;
+      }
+    }
+
+    function renderStatus(statusByService) {
+      const grid = document.getElementById('statusGrid');
+      grid.innerHTML = '';
+      SERVICES.forEach(svc => {
+        const svcStatus = statusByService[svc] || null;
+        const card = document.createElement('div');
+        card.className = 'service-card';
+
+        let stateHtml = '';
+        let cardClass = 'status-ok';
+
+        if (!svcStatus || svcStatus.error) {
+          cardClass = 'status-unknown';
+          stateHtml = `<span class="scenario-tag">unreachable</span>`;
+        } else {
+          // Try to parse active scenarios from status response
+          const scenarios = svcStatus.scenarios || svcStatus.active_scenarios || svcStatus.chaos_state || {};
+          let hasActive = false;
+          let hasSevere = false;
+          let hasMild = false;
+
+          if (typeof scenarios === 'object') {
+            Object.entries(scenarios).forEach(([name, state]) => {
+              const enabled = state && (state.enabled === true || state.active === true || state === true);
+              if (enabled) {
+                hasActive = true;
+                const severity = (state.severity || '').toLowerCase();
+                if (severity === 'severe') hasSevere = true;
+                else hasMild = true;
+                stateHtml += `<span class="scenario-tag ${severity || 'mild'}">${name} (${severity || 'active'})</span> `;
+              }
+            });
+          }
+
+          if (!hasActive) {
+            stateHtml = `<span class="scenario-tag none">no chaos active</span>`;
+            cardClass = 'status-ok';
+          } else if (hasSevere) {
+            cardClass = 'status-severe';
+          } else {
+            cardClass = 'status-mild';
+          }
+        }
+
+        card.classList.add(cardClass);
+        card.innerHTML = `
+          <div class="service-name">${svc}</div>
+          <div class="chaos-state">${stateHtml}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function enableChaos() {
+      const service = document.getElementById('svcSelect').value;
+      const scenario = document.getElementById('scenarioSelect').value;
+      const severity = getSeverity();
+      const durationVal = document.getElementById('durationInput').value;
+      const body = { service, scenario, severity };
+      if (durationVal) body.duration_seconds = parseInt(durationVal, 10);
+
+      try {
+        const res = await fetch('/api/chaos/enable', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        showResult(data, !res.ok);
+        setTimeout(fetchStatus, 500);
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      }
+    }
+
+    async function disableChaos() {
+      const service = document.getElementById('svcSelect').value;
+      const scenario = document.getElementById('scenarioSelect').value;
+
+      try {
+        const res = await fetch('/api/chaos/disable', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ service, scenario })
+        });
+        const data = await res.json();
+        showResult(data, !res.ok);
+        setTimeout(fetchStatus, 500);
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      }
+    }
+
+    async function resetAll() {
+      try {
+        const res = await fetch('/api/chaos/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ service: 'all' })
+        });
+        const data = await res.json();
+        showResult(data, !res.ok);
+        setTimeout(fetchStatus, 500);
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      }
+    }
+
+    async function applyPreset(level) {
+      const scenarios = ['latency', 'errors'];
+      const results = [];
+      for (const scenario of scenarios) {
+        try {
+          const res = await fetch('/api/chaos/enable', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ service: 'all', scenario, severity: level })
+          });
+          results.push(await res.json());
+        } catch (err) {
+          results.push({ error: err.message, scenario });
+        }
+      }
+      showResult(results, false);
+      setTimeout(fetchStatus, 500);
+    }
+
+    // Initial fetch and auto-refresh
+    fetchStatus();
+    setInterval(fetchStatus, 5000);
+  </script>
+</body>
+</html>
