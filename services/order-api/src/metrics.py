@@ -1,6 +1,6 @@
 """Prometheus metrics configuration for order-api service."""
 
-from prometheus_client import Counter, Histogram, Gauge, start_http_server
+from prometheus_client import Counter, Histogram, Gauge
 from opentelemetry import trace
 
 # gRPC request counter with labels: method, status
@@ -41,14 +41,6 @@ def get_trace_exemplar():
     return {}
 
 
-def start_metrics_server(port=8000):
-    """
-    Start the Prometheus metrics HTTP server.
-
-    The prometheus_client.start_http_server() runs a simple HTTP server
-    in a daemon thread that automatically serves metrics at /metrics.
-
-    Args:
-        port: Port number for the metrics HTTP server (default: 8000)
-    """
-    start_http_server(port)
+# NOTE: start_metrics_server was removed in Phase 6 (chaos engineering).
+# Prometheus metrics are now served by the Flask chaos server in chaos.py
+# on the same port 8000 alongside /chaos/* endpoints.

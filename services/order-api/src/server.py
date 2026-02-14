@@ -24,7 +24,8 @@ import order_pb2_grpc
 import db
 import redis_queue
 from logger import json_log
-from metrics import start_metrics_server, grpc_requests_total, grpc_request_duration_seconds, orders_created_total, service_healthy, get_trace_exemplar
+from metrics import grpc_requests_total, grpc_request_duration_seconds, orders_created_total, service_healthy, get_trace_exemplar
+from chaos import ChaosInterceptor, start_chaos_server
 
 # Get tracer for manual instrumentation
 tracer = trace.get_tracer("order-api")
@@ -338,23 +339,26 @@ def serve():
                 error=str(e))
         sys.exit(1)
 
-    # Start Prometheus metrics HTTP server
+    # Start combined metrics + chaos HTTP server (Flask on port 8000)
     metrics_port = int(os.getenv("METRICS_PORT", "8000"))
     try:
-        start_metrics_server(port=metrics_port)
-        json_log("INFO", f"Metrics HTTP server started on port {metrics_port}",
-                handler="MetricsServer")
+        start_chaos_server(port=metrics_port)
+        json_log("INFO", f"Metrics and chaos HTTP server started on port {metrics_port}",
+                handler="Server")
     except Exception as e:
-        json_log("ERROR", "Failed to start metrics server",
-                handler="MetricsServer",
+        json_log("ERROR", "Failed to start metrics and chaos server",
+                handler="Server",
                 error=str(e))
         # Non-fatal error, continue with gRPC server
 
     # Get gRPC port from environment
     grpc_port = os.getenv("GRPC_PORT", "50051")
 
-    # Create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    # Create gRPC server with chaos interceptor
+    server = grpc.server(
+        futures.ThreadPoolExecutor(max_workers=10),
+        interceptors=[ChaosInterceptor()]
+    )
     order_pb2_grpc.add_OrderServiceServicer_to_server(OrderServicer(), server)
 
     # Listen on all interfaces
