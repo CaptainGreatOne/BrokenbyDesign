@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Remove the setup tax so learning happens immediately. Services already exist and misbehave. Tools are pre-wired. You just learn.
-**Current focus:** Phase 7: Event Streaming (next)
+**Current focus:** Phase 7: Event Streaming
 
 ## Current Position
 
-Phase: 6 of 12 (Chaos Engineering) — COMPLETE
-Plan: 5 of 5 in current phase
-Status: Phase complete (CAOS-06 deferred to Phase 10)
-Last activity: 2026-02-14 - Phase 6 verified, CAOS-06 deferred to Phase 10
+Phase: 7 of 12 (Event Streaming) — NOT STARTED
+Plan: 0 of ? in current phase
+Status: Ready to plan
+Last activity: 2026-02-14 - Phase 6 UAT concluded, fixes committed
 
 Progress: [███████░░░] ~50% overall (27 plans completed)
 
@@ -141,6 +141,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Phase 6 complete — 5/5 plans executed, 5/6 verified (CAOS-06 deferred to Phase 10)
+Stopped at: Phase 6 UAT concluded, transitioning to Phase 7
 Resume file: None
-Next: Plan Phase 7 (Event Streaming)
+Next: Plan Phase 7 (Event Streaming) — needs CONTEXT.md discussion first
