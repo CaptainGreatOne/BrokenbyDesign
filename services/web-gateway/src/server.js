@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 const { trace } = require('@opentelemetry/api');
 const logger = require('./logger');
 const routes = require('./routes');
+const { chaosMiddleware, chaosRouter } = require('./chaos');
 const { register, httpRequestCounter, httpRequestDuration, serviceHealthy } = require('./metrics');
 
 const app = express();
@@ -87,6 +88,12 @@ app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());
 });
+
+// Chaos engineering control endpoints (mounted before chaos middleware)
+app.use('/chaos', chaosRouter);
+
+// Chaos engineering middleware (injects failures into normal request handling)
+app.use(chaosMiddleware);
 
 // Mount routes
 app.use('/', routes);
