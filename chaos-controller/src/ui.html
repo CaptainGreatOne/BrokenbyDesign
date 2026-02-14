@@ -361,7 +361,7 @@
           stateHtml = `<span class="scenario-tag">unreachable</span>`;
         } else {
           // Try to parse active scenarios from status response
-          const scenarios = svcStatus.scenarios || svcStatus.active_scenarios || svcStatus.chaos_state || {};
+          const scenarios = svcStatus.chaos || svcStatus;          
           let hasActive = false;
           let hasSevere = false;
           let hasMild = false;
