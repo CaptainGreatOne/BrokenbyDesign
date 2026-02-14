@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 6 of 12 (Chaos Engineering)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-14 - Completed 06-01-PLAN.md (Chaos State Module and Express Integration)
+Last activity: 2026-02-14 - Completed 06-02-PLAN.md (Order-API Chaos gRPC Interceptor and Flask HTTP Endpoints)
 
 Progress: [██████░░░░] ~43% overall (23 plans completed)
 
@@ -113,6 +113,11 @@ Recent decisions affecting current work:
 - OTel span annotation in chaos error injection: getActiveSpan() + setStatus(ERROR) makes injected errors visible in Jaeger traces
 - In-memory chaos state only: resets on restart, no persistence needed for learning sandbox
 - Chaos crash scenario: returns 503 to triggering request then process.exit(1) after 100ms log flush
+- Order-api chaos latency presets higher (500ms/5000ms mild/severe) vs web-gateway to simulate slow DB queries
+- Flask replaces prometheus_client.start_http_server for unified port 8000 serving both /metrics and /chaos/*
+- ChaosInterceptor uses handler._replace(unary_unary=...) to wrap gRPC handlers without breaking namedtuple type
+- os._exit(1) for crash scenario bypasses Python cleanup for realistic process termination
+- Auto-disable timer: threading.Timer daemon=True stored in chaos_state for cancellation on re-enable
 
 ### Pending Todos
 
@@ -125,6 +130,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 06-01-PLAN.md (Chaos State Module and Express Integration)
+Stopped at: Completed 06-02-PLAN.md (Order-API Chaos gRPC Interceptor and Flask HTTP Endpoints)
 Resume file: None
-Next: Execute 06-02 (chaos endpoints for order-api or fulfillment-worker)
+Next: Execute 06-03 (chaos endpoints for fulfillment-worker Go service)
