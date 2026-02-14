@@ -132,7 +132,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+1. **Investigate mock Slack UI not showing crash-triggered alerts** (area: alerting) — `.planning/todos/pending/2026-02-14-mock-slack-ui-missing-crash-alerts.md`
 
 ### Blockers/Concerns
 
