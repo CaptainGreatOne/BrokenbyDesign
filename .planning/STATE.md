@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 6 of 12 (Chaos Engineering)
-Plan: 4 of 5 in current phase
-Status: In progress
-Last activity: 2026-02-14 - Completed 06-04-PLAN.md (Chaos Controller Service)
+Plan: 5 of 5 in current phase
+Status: Phase complete
+Last activity: 2026-02-14 - Completed 06-05-PLAN.md (Docker Compose Integration and Chaos Shell Scripts)
 
-Progress: [██████░░░░] ~46% overall (25 plans completed)
+Progress: [███████░░░] ~48% overall (26 plans completed)
 
 ## Performance Metrics
 
@@ -121,6 +121,10 @@ Recent decisions affecting current work:
 - Go chaos endpoints share port 2112 with /metrics and /health (no separate port)
 - Go chaos crash: os.Exit(1) with 100ms sleep for log flush
 - Go auto-disable timer: time.AfterFunc with timers map protected by existing RWMutex
+- Chaos Docker Compose integration via --profile chaos with docker-compose.chaos.yml override setting restart: no on app services
+- chaos-controller keeps restart: unless-stopped (control plane, not chaos target)
+- Named chaos scenario library with Grafana/Prometheus/Jaeger observation hints per scenario
+- CHAOS_CONTROLLER_URL env var with localhost:9095 default for script portability
 - Chaos-controller port 9095: avoids all existing service ports, memorable controller port
 - Native fetch (Node 20) in chaos-controller: no extra dependency for simple proxy calls
 - Chaos-controller 'all' target: fans out concurrently via Promise.all, returns mixed results on partial failure
@@ -136,7 +140,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-14T14:34:36Z
-Stopped at: Completed 06-04-PLAN.md (Chaos Controller Service)
+Last session: 2026-02-14T14:46:23Z
+Stopped at: Completed 06-05-PLAN.md (Docker Compose Integration and Chaos Shell Scripts)
 Resume file: None
-Next: Execute 06-05 (chaos exercises/docker-compose integration)
+Next: Phase 6 complete. Begin Phase 7 (Kafka event streaming).
