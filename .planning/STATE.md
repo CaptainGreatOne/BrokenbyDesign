@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 6 of 12 (Chaos Engineering)
-Plan: 3 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-14 - Completed 06-03-PLAN.md (Fulfillment-Worker Chaos Package)
+Last activity: 2026-02-14 - Completed 06-04-PLAN.md (Chaos Controller Service)
 
-Progress: [██████░░░░] ~44% overall (24 plans completed)
+Progress: [██████░░░░] ~46% overall (25 plans completed)
 
 ## Performance Metrics
 
@@ -121,6 +121,10 @@ Recent decisions affecting current work:
 - Go chaos endpoints share port 2112 with /metrics and /health (no separate port)
 - Go chaos crash: os.Exit(1) with 100ms sleep for log flush
 - Go auto-disable timer: time.AfterFunc with timers map protected by existing RWMutex
+- Chaos-controller port 9095: avoids all existing service ports, memorable controller port
+- Native fetch (Node 20) in chaos-controller: no extra dependency for simple proxy calls
+- Chaos-controller 'all' target: fans out concurrently via Promise.all, returns mixed results on partial failure
+- duration_seconds omitted when null in chaos-controller proxy: preserves default toggle behavior on services
 
 ### Pending Todos
 
@@ -132,7 +136,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-14T14:29:33Z
-Stopped at: Completed 06-03-PLAN.md (Fulfillment-Worker Chaos Package)
+Last session: 2026-02-14T14:34:36Z
+Stopped at: Completed 06-04-PLAN.md (Chaos Controller Service)
 Resume file: None
-Next: Execute 06-04 (chaos exercises)
+Next: Execute 06-05 (chaos exercises/docker-compose integration)
