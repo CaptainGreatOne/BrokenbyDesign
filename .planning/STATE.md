@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Remove the setup tax so learning happens immediately. Services already exist and misbehave. Tools are pre-wired. You just learn.
-**Current focus:** Phase 5: Distributed Tracing
+**Current focus:** Phase 6: Chaos Engineering
 
 ## Current Position
 
-Phase: 5 of 12 (Distributed Tracing)
-Plan: 5 of 5 in current phase
-Status: Phase complete
-Last activity: 2026-02-12 - Completed 05-05-PLAN.md (Provision Grafana Datasources)
+Phase: 6 of 12 (Chaos Engineering)
+Plan: 1 of 5 in current phase
+Status: In progress
+Last activity: 2026-02-14 - Completed 06-01-PLAN.md (Chaos State Module and Express Integration)
 
-Progress: [██████░░░░] 81% (22 plans completed)
+Progress: [██████░░░░] ~43% overall (23 plans completed)
 
 ## Performance Metrics
 
@@ -109,6 +109,10 @@ Recent decisions affecting current work:
 - tracesToMetrics predefined queries: Request Rate, Error Rate, Latency P95 as standard RED metrics linked from Jaeger traces
 - exemplarTraceIdDestinations with traceID label: Enables metric-to-trace navigation from Prometheus exemplars to Jaeger in Grafana
 - 5-minute time shift window for trace correlation: spanStartTimeShift/spanEndTimeShift provide context around trace for logs and metrics
+- Chaos middleware ordering: chaos routes before chaosMiddleware prevents self-sabotage on control endpoints
+- OTel span annotation in chaos error injection: getActiveSpan() + setStatus(ERROR) makes injected errors visible in Jaeger traces
+- In-memory chaos state only: resets on restart, no persistence needed for learning sandbox
+- Chaos crash scenario: returns 503 to triggering request then process.exit(1) after 100ms log flush
 
 ### Pending Todos
 
@@ -120,7 +124,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-12
-Stopped at: Phase 5 complete — all 5 plans executed, verification passed (23/23 must-haves)
+Last session: 2026-02-14
+Stopped at: Completed 06-01-PLAN.md (Chaos State Module and Express Integration)
 Resume file: None
-Next: Plan Phase 6 (Chaos Engineering)
+Next: Execute 06-02 (chaos endpoints for order-api or fulfillment-worker)
