@@ -3,6 +3,7 @@ package metrics
 import (
 	"context"
 	"fmt"
+	"fulfillment-worker/internal/chaos"
 	"log"
 	"net/http"
 
@@ -73,6 +74,9 @@ func StartMetricsServer(port int) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	})
+
+	// Register chaos engineering endpoints
+	chaos.RegisterHandlers(mux)
 
 	addr := fmt.Sprintf(":%d", port)
 	log.Printf("Metrics server starting on port %d", port)

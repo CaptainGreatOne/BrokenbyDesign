@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"fulfillment-worker/internal/chaos"
 	"fulfillment-worker/internal/db"
 	"fulfillment-worker/internal/logger"
 	"fulfillment-worker/internal/metrics"
@@ -88,6 +89,33 @@ func main() {
 			"product_id": msg.ProductID,
 			"quantity":   msg.Quantity,
 		})
+
+		// Chaos engineering checks
+		if shouldCrash := chaos.ShouldCrash(); shouldCrash {
+			logger.Error("Chaos: service crash triggered", "ChaosInterceptor", orderID, nil, nil)
+			time.Sleep(100 * time.Millisecond) // Allow log flush
+			os.Exit(1)
+		}
+
+		if inject, delay := chaos.ShouldInjectLatency(); inject {
+			logger.Warn(fmt.Sprintf("Chaos: injecting latency %v", delay), "ChaosInterceptor", orderID, nil)
+			time.Sleep(delay)
+		}
+
+		if chaos.ShouldInjectError() {
+			logger.Warn("Chaos: injecting processing error", "ChaosInterceptor", orderID, nil)
+			// Track as error in metrics
+			duration := time.Since(startTime)
+			exemplar := metrics.TraceExemplar(ctx)
+			if exemplar != nil {
+				metrics.ProcessingDuration.WithLabelValues("error").(prometheus.ExemplarObserver).ObserveWithExemplar(duration.Seconds(), exemplar)
+				metrics.OrdersProcessed.WithLabelValues("error").(prometheus.ExemplarAdder).AddWithExemplar(1, exemplar)
+			} else {
+				metrics.ProcessingDuration.WithLabelValues("error").Observe(duration.Seconds())
+				metrics.OrdersProcessed.WithLabelValues("error").Inc()
+			}
+			return fmt.Errorf("chaos: injected processing error")
+		}
 
 		// Simulate realistic processing delays (~8% of the time)
 		if rand.Float64() < 0.08 {
